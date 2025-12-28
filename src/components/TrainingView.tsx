@@ -11,8 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ExerciseSelector } from '@/components/ExerciseSelector';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Delete02Icon, InformationCircleIcon } from '@hugeicons/core-free-icons';
+import { Trash2, Info } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -313,14 +312,14 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                 variant="ghost"
                 onClick={() => setShowWarmUpCoolDown(true)}
               >
-                <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} />
+                <Info className="h-4 w-4" />
               </Button>
               <Button
                 size="icon-xs"
                 variant="destructive"
                 onClick={() => setShowDeleteConfirm(true)}
               >
-                <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </CardTitle>
@@ -434,7 +433,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                       variant="destructive"
                       onClick={() => handleDeleteSet(set.id)}
                     >
-                      <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardTitle>
@@ -461,7 +460,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                           onClick={() => handleDeleteRound(round.id)}
                           className="ml-auto"
                         >
-                          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -502,7 +501,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                     variant="ghost"
                     onClick={handleShowLastUsed}
                   >
-                    <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} />
+                    <Info className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

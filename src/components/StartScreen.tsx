@@ -8,8 +8,7 @@ import type { Training, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { TrainingView } from '@/components/TrainingView';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Delete02Icon } from '@hugeicons/core-free-icons';
+import { Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -256,7 +255,7 @@ export function StartScreen() {
                         variant="ghost"
                         onClick={(e) => handleDeleteClick(training.id, e)}
                       >
-                        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardTitle>

@@ -5,8 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Menu01Icon, Home01Icon, Dumbbell01Icon, Analytics01Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { Menu, Home, Dumbbell, BarChart3, User } from 'lucide-react';
 
 interface NavigationProps {
   currentPage: 'training' | 'exercises' | 'stats' | 'account';
@@ -19,7 +18,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="icon" className="rounded-full shadow-lg">
-            <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />
+            <Menu className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -27,28 +26,28 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
             onClick={() => onNavigate('training')}
             className={currentPage === 'training' ? 'bg-accent' : ''}
           >
-            <HugeiconsIcon icon={Home01Icon} strokeWidth={2} />
+            <Home className="h-4 w-4" />
             Training
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => onNavigate('exercises')}
             className={currentPage === 'exercises' ? 'bg-accent' : ''}
           >
-            <HugeiconsIcon icon={Dumbbell01Icon} strokeWidth={2} />
+            <Dumbbell className="h-4 w-4" />
             Exercises
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => onNavigate('stats')}
             className={currentPage === 'stats' ? 'bg-accent' : ''}
           >
-            <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} />
+            <BarChart3 className="h-4 w-4" />
             Statistics
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => onNavigate('account')}
             className={currentPage === 'account' ? 'bg-accent' : ''}
           >
-            <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
+            <User className="h-4 w-4" />
             Account
           </DropdownMenuItem>
         </DropdownMenuContent>

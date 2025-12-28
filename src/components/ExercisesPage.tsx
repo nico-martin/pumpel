@@ -24,8 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Delete02Icon, Edit02Icon } from '@hugeicons/core-free-icons';
+import { Trash2, Edit } from 'lucide-react';
 
 const BODY_PARTS = [
   'Chest',
