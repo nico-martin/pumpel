@@ -3,7 +3,6 @@ import { getTraining } from './trainings';
 import { getSetsByTrainingId, getSetsByExerciseId } from './sets';
 import { getRoundsBySetId } from './rounds';
 import type {
-  Exercise,
   Training,
   Set,
   Round,

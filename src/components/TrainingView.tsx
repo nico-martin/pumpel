@@ -5,7 +5,7 @@ import { createSet, deleteSet } from '@/db/sets';
 import { createRound, deleteRound } from '@/db/rounds';
 import { deleteRoundsBySetId } from '@/db/rounds';
 import { getUser } from '@/db/user';
-import type { Exercise, TrainingWithDetails, SetWithExercise, SetWithRounds } from '@/db/types';
+import type { Exercise, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

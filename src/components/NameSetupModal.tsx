@@ -34,10 +34,9 @@ export function NameSetupModal({ open, onSave }: NameSetupModalProps) {
   };
 
   return (
-    <AlertDialog open={open}>
+    <AlertDialog open={open} onOpenChange={() => {}}>
       <AlertDialogContent
         onEscapeKeyDown={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => e.preventDefault()}
       >
         <AlertDialogHeader>
           <AlertDialogTitle>Welcome to Pumpel</AlertDialogTitle>

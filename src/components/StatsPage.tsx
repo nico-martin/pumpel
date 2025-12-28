@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getAllTrainings } from '@/db/trainings';
 import { getAllSets } from '@/db/sets';
-import { getAllRounds } from '@/db/rounds';
 import { getAllExercises } from '@/db/exercises';
 import { getUser } from '@/db/user';
-import type { Training, Set, Round, Exercise } from '@/db/types';
+import type { Training, Set, Exercise } from '@/db/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +22,6 @@ export function StatsPage() {
   });
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [sets, setSets] = useState<Set[]>([]);
-  const [rounds, setRounds] = useState<Round[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,18 +38,17 @@ export function StatsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [user, allTrainings, allSets, allRounds, allExercises] = await Promise.all([
+      const [user, allTrainings, allSets, allExercises] = await Promise.all([
         getUser(),
         getAllTrainings(),
         getAllSets(),
-        getAllRounds(),
         getAllExercises(),
       ]);
       if (user) {
         setUserName(user.name);
       }
       setExercises(allExercises);
-      filterDataWithAll(allTrainings, allSets, allRounds);
+      filterDataWithAll(allTrainings, allSets);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -61,29 +58,24 @@ export function StatsPage() {
 
   const filterDataWithAll = async (
     allTrainings: Training[],
-    allSets: Set[],
-    allRounds: Round[]
+    allSets: Set[]
   ) => {
     const filteredTrainings = allTrainings.filter(
       (t) => t.startTime >= dateRange.start && t.startTime <= dateRange.end && t.endTime > 0
     );
     const trainingIds = new Set(filteredTrainings.map((t) => t.id));
     const filteredSets = allSets.filter((s) => trainingIds.has(s.trainingId));
-    const setIds = new Set(filteredSets.map((s) => s.id));
-    const filteredRounds = allRounds.filter((r) => setIds.has(r.setId));
 
     setTrainings(filteredTrainings);
     setSets(filteredSets);
-    setRounds(filteredRounds);
   };
 
   const filterData = async () => {
-    const [allTrainings, allSets, allRounds] = await Promise.all([
+    const [allTrainings, allSets] = await Promise.all([
       getAllTrainings(),
       getAllSets(),
-      getAllRounds(),
     ]);
-    filterDataWithAll(allTrainings, allSets, allRounds);
+    filterDataWithAll(allTrainings, allSets);
   };
 
   const setPreset = (days: number) => {

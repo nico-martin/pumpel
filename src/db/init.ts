@@ -44,8 +44,7 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
   }
 
   dbInstance = await openDB<WorkoutTrackerDB>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion, newVersion, transaction) {
-      console.log(`Upgrading database from version ${oldVersion} to ${newVersion}`);
+    upgrade(db) {
 
       // Create exercises store
       if (!db.objectStoreNames.contains('exercises')) {

@@ -8,6 +8,9 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 - **No Cloud** - Your workout data never leaves your device
 - **No Server** - Runs entirely in your browser
 - **No Cost** - Free forever, no subscriptions or hidden fees
+- **Progressive Web App (PWA)** - Install on your device and use offline
+- **Offline First** - Works completely offline with cached resources
+- **Auto Updates** - Automatic app updates with notification
 - **Mobile-First** - Optimized for mobile use, works on desktop too
 - **Exercise Management** - Create and manage custom exercises
 - **Workout Tracking** - Track sets, rounds, weights, and reps
@@ -20,9 +23,11 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 - **React 19** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool
+- **vite-plugin-pwa** - PWA support with Workbox
 - **Tailwind CSS 4** - Styling
 - **shadcn/ui** - UI components
 - **IndexedDB (idb)** - Local database
+- **Service Workers** - Offline caching and updates
 - **GitHub Actions** - Automated FTP deployment
 
 ## Getting Started
@@ -186,10 +191,35 @@ npx shadcn@latest add <component-name>
 2. Click "Delete All Data"
 3. Confirm the deletion
 
+## Progressive Web App (PWA)
+
+Pumpel is a Progressive Web App, which means you can:
+
+### Install on Mobile (iOS/Android)
+1. Open Pumpel in your mobile browser
+2. Tap the share/menu button
+3. Select "Add to Home Screen"
+4. The app will appear on your home screen like a native app
+
+### Install on Desktop
+1. Open Pumpel in Chrome/Edge
+2. Click the install icon in the address bar
+3. Click "Install" in the popup
+4. The app will open in its own window
+
+### Offline Support
+
+- The app works completely offline after the first visit
+- All static assets are cached automatically
+- Database operations work offline (IndexedDB is local)
+- Updates are downloaded in the background
+- You'll see a notification when a new version is ready
+
 ## Browser Compatibility
 
 Pumpel works in all modern browsers that support:
 - IndexedDB
+- Service Workers
 - ES2020+
 - CSS Grid & Flexbox
 

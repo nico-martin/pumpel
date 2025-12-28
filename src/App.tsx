@@ -5,6 +5,7 @@ import { StatsPage } from '@/components/StatsPage';
 import { AccountPage } from '@/components/AccountPage';
 import { Navigation } from '@/components/Navigation';
 import { NameSetupModal } from '@/components/NameSetupModal';
+import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt';
 import { getUser, saveUser } from '@/db/user';
 
 type Page = 'training' | 'exercises' | 'stats' | 'account';
@@ -51,6 +52,7 @@ export function App() {
   return (
     <>
       <NameSetupModal open={showNameSetup} onSave={handleSaveName} />
+      <PWAUpdatePrompt />
       <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
       {currentPage === 'training' && <StartScreen />}
       {currentPage === 'exercises' && <ExercisesPage />}

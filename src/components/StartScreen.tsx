@@ -8,7 +8,6 @@ import type { Training, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { TrainingView } from '@/components/TrainingView';
-import { TrainingDetails } from '@/components/TrainingDetails';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 import {
@@ -90,10 +89,6 @@ export function StartScreen() {
     setActiveTraining(null);
     setSelectedTrainingId(null); // Clear selected training to go back to list
     loadData(); // Reload to show the newly completed training in the list
-  };
-
-  const handleViewTraining = (trainingId: string) => {
-    setSelectedTrainingId(trainingId);
   };
 
   const handleBackToList = () => {
@@ -273,8 +268,7 @@ export function StartScreen() {
                     )}
                     {hasExercises && (
                       <div className="space-y-2">
-                        {visibleSets.map((set, idx) => {
-                          const totalWeight = set.rounds.reduce((sum, r) => sum + r.weight * r.reps, 0);
+                        {visibleSets.map((set) => {
                           const avgWeight = set.rounds.length > 0
                             ? (set.rounds.reduce((sum, r) => sum + r.weight, 0) / set.rounds.length).toFixed(1)
                             : '0';
