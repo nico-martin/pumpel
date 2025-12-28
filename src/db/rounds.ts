@@ -20,6 +20,12 @@ export async function getRound(id: string): Promise<Round | undefined> {
   return db.get('rounds', id);
 }
 
+// Get all rounds
+export async function getAllRounds(): Promise<Round[]> {
+  const db = await getDB();
+  return db.getAll('rounds');
+}
+
 // Get all rounds for a set
 export async function getRoundsBySetId(setId: string): Promise<Round[]> {
   const db = await getDB();

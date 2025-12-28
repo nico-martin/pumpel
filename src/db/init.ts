@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Exercise, Training, Set, Round } from './types';
+import type { Exercise, Training, Set, Round, User } from './types';
 
 // Define the database schema
 export interface WorkoutTrackerDB {
@@ -27,10 +27,14 @@ export interface WorkoutTrackerDB {
     value: Round;
     indexes: { setId: string };
   };
+  user: {
+    key: string;
+    value: User;
+  };
 }
 
 const DB_NAME = 'workoutTrackerDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance: IDBPDatabase<WorkoutTrackerDB> | null = null;
 
@@ -76,6 +80,13 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
           keyPath: 'id',
         });
         roundsStore.createIndex('setId', 'setId');
+      }
+
+      // Create user store (version 2)
+      if (!db.objectStoreNames.contains('user')) {
+        db.createObjectStore('user', {
+          keyPath: 'id',
+        });
       }
     },
     blocked() {

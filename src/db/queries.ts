@@ -104,15 +104,25 @@ export async function getExerciseHistory(exerciseId: string): Promise<ExerciseHi
 
 // Get the last used weight and reps for a specific exercise
 export async function getLastUsedWeightForExercise(
-  exerciseId: string
+  exerciseId: string,
+  excludeTrainingId?: string
 ): Promise<{ weight: number; reps: number; date: number } | null> {
   const exerciseHistory = await getExerciseHistory(exerciseId);
   if (!exerciseHistory || exerciseHistory.history.length === 0) {
     return null;
   }
 
-  // Get the most recent training
-  const mostRecentTraining = exerciseHistory.history[0];
+  // Filter out the current training if excludeTrainingId is provided
+  const filteredHistory = excludeTrainingId
+    ? exerciseHistory.history.filter((h) => h.training.id !== excludeTrainingId)
+    : exerciseHistory.history;
+
+  if (filteredHistory.length === 0) {
+    return null;
+  }
+
+  // Get the most recent training (excluding current if specified)
+  const mostRecentTraining = filteredHistory[0];
 
   // Get the last set from that training
   const lastSet = mostRecentTraining.sets[mostRecentTraining.sets.length - 1];

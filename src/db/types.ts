@@ -5,6 +5,7 @@ export interface Exercise {
   name: string;
   description?: string;
   type?: 'strength' | 'cardio' | 'flexibility' | string;
+  bodyPart?: string; // e.g., "Chest", "Back", "Legs", etc.
   createdAt: number; // Unix timestamp
 }
 
@@ -65,3 +66,13 @@ export interface ExerciseHistory {
     sets: SetWithRounds[];
   }[];
 }
+
+export interface User {
+  id: string; // Always 'user' (single record)
+  name: string;
+  createdAt: number; // Unix timestamp
+  updatedAt: number; // Unix timestamp
+}
+
+// Input types for user
+export type UserInput = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;

@@ -20,6 +20,12 @@ export async function getSet(id: string): Promise<Set | undefined> {
   return db.get('sets', id);
 }
 
+// Get all sets
+export async function getAllSets(): Promise<Set[]> {
+  const db = await getDB();
+  return db.getAll('sets');
+}
+
 // Get all sets for a training
 export async function getSetsByTrainingId(trainingId: string): Promise<Set[]> {
   const db = await getDB();
