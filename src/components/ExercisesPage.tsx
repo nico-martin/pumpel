@@ -157,14 +157,14 @@ export function ExercisesPage() {
                       variant="ghost"
                       onClick={() => handleEditClick(exercise)}
                     >
-                      <HugeiconsIcon icon={Edit02Icon} strokeWidth={2} />
+                      <Edit className="size-4" />
                     </Button>
                     <Button
                       size="icon-xs"
                       variant="destructive"
                       onClick={() => handleDeleteClick(exercise.id)}
                     >
-                      <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
                 </CardTitle>

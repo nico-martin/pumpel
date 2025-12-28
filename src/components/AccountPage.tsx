@@ -19,8 +19,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Sun, Moon, Monitor } from 'lucide-react';
 
 export function AccountPage() {
+  const { theme, setTheme } = useTheme();
   const [userName, setUserName] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState('');
@@ -306,6 +309,44 @@ export function AccountPage() {
               </Button>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Theme Settings */}
+      <Card size="sm" className="mb-6">
+        <CardHeader>
+          <CardTitle>Appearance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <Label>Theme</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant={theme === 'light' ? 'default' : 'outline'}
+                onClick={() => setTheme('light')}
+                className="flex items-center justify-center gap-2"
+              >
+                <Sun className="size-4" />
+                <span>Light</span>
+              </Button>
+              <Button
+                variant={theme === 'dark' ? 'default' : 'outline'}
+                onClick={() => setTheme('dark')}
+                className="flex items-center justify-center gap-2"
+              >
+                <Moon className="size-4" />
+                <span>Dark</span>
+              </Button>
+              <Button
+                variant={theme === 'system' ? 'default' : 'outline'}
+                onClick={() => setTheme('system')}
+                className="flex items-center justify-center gap-2"
+              >
+                <Monitor className="size-4" />
+                <span>System</span>
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

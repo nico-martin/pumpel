@@ -53,11 +53,13 @@ export function App() {
     <>
       <NameSetupModal open={showNameSetup} onSave={handleSaveName} />
       <PWAUpdatePrompt />
-      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-      {currentPage === 'training' && <StartScreen />}
-      {currentPage === 'exercises' && <ExercisesPage />}
-      {currentPage === 'stats' && <StatsPage />}
-      {currentPage === 'account' && <AccountPage />}
+      <div className="mx-auto max-w-2xl">
+        <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+        {currentPage === 'training' && <StartScreen />}
+        {currentPage === 'exercises' && <ExercisesPage />}
+        {currentPage === 'stats' && <StatsPage />}
+        {currentPage === 'account' && <AccountPage />}
+      </div>
     </>
   );
 }
