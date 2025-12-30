@@ -2,6 +2,9 @@
 
 # Pumpel - Workout Tracker
 
+[![GitHub](https://img.shields.io/badge/GitHub-nico--martin%2Fpumpel-blue?logo=github)](https://github.com/nico-martin/pumpel/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A privacy-focused fitness app that helps you track your gym workouts, sets, and weights. Built with React, TypeScript, and Tailwind CSS.
 
 > ## ⚠️ Development Notice
@@ -49,7 +52,7 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/nico-martin/pumpel.git
 cd pumpel
 ```
 
@@ -63,7 +66,7 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+4. Open your browser and navigate to `http://localhost:5000`
 
 ### Build for Production
 
