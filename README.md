@@ -1,3 +1,5 @@
+![Pumpel Banner](assets/banner.jpg)
+
 # Pumpel - Workout Tracker
 
 A privacy-focused fitness app that helps you track your gym workouts, sets, and weights. Built with React, TypeScript, and Tailwind CSS.

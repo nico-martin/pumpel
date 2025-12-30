@@ -11,7 +11,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['favicon.svg', 'app-icon.svg'],
       manifest: {
         name: 'Pumpel - Workout Tracker',
         short_name: 'Pumpel',
@@ -24,7 +24,7 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/icon.svg',
+            src: '/app-icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable'
