@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllExercises, updateExercise, deleteExercise } from '@/db/exercises';
 import { getSetsByExerciseId } from '@/db/sets';
 import { getUser } from '@/db/user';
@@ -24,7 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, ChevronLeft } from 'lucide-react';
 
 const BODY_PARTS = [
   'Chest',
@@ -38,6 +39,7 @@ const BODY_PARTS = [
 ];
 
 export function ExercisesPage() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,9 +131,19 @@ export function ExercisesPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 pt-20">
-      <h1 className="text-2xl font-bold mb-2">Exercises</h1>
-      <p className="text-muted-foreground mb-6">{userName}'s exercise library</p>
+    <div className="min-h-screen p-4 pt-5">
+      <div className="flex items-center gap-2 mb-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/')}
+          className="shrink-0"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Exercises</h1>
+      </div>
+      <p className="text-muted-foreground mb-6 ml-12">{userName}'s exercise library</p>
 
       {exercises.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">

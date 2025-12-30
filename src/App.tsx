@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { StartScreen } from '@/components/StartScreen';
 import { ExercisesPage } from '@/components/ExercisesPage';
 import { StatsPage } from '@/components/StatsPage';
@@ -8,10 +9,7 @@ import { NameSetupModal } from '@/components/NameSetupModal';
 import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt';
 import { getUser, saveUser } from '@/db/user';
 
-type Page = 'training' | 'exercises' | 'stats' | 'account';
-
 export function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('training');
   const [showNameSetup, setShowNameSetup] = useState(false);
   const [isCheckingUser, setIsCheckingUser] = useState(true);
 
@@ -50,17 +48,20 @@ export function App() {
   }
 
   return (
-    <>
+    <HashRouter>
       <NameSetupModal open={showNameSetup} onSave={handleSaveName} />
       <PWAUpdatePrompt />
       <div className="mx-auto max-w-2xl">
-        <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-        {currentPage === 'training' && <StartScreen />}
-        {currentPage === 'exercises' && <ExercisesPage />}
-        {currentPage === 'stats' && <StatsPage />}
-        {currentPage === 'account' && <AccountPage />}
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<StartScreen />} />
+          <Route path="/exercises" element={<ExercisesPage />} />
+          <Route path="/stats" element={<StatsPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
-    </>
+    </HashRouter>
   );
 }
 

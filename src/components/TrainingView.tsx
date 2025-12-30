@@ -605,23 +605,25 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       )}
 
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
-        {isActive && training?.sets.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center mb-2">
-            Keep it up, {userName}! Add your first set to get started.
-          </p>
-        )}
-        {isActive && training && training.sets.length > 0 && (
-          <p className="text-xs text-muted-foreground text-center mb-2">
-            Great work, {userName}! {training.sets.length} {training.sets.length === 1 ? 'set' : 'sets'} completed.
-          </p>
-        )}
-        <Button
-          variant={isActive ? "destructive" : "default"}
-          className="w-full"
-          onClick={handleFinishTraining}
-        >
-          {isActive ? 'Finish Training' : 'Update'}
-        </Button>
+        <div className="mx-auto max-w-2xl">
+          {isActive && training?.sets.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center mb-2">
+              Keep it up, {userName}! Add your first set to get started.
+            </p>
+          )}
+          {isActive && training && training.sets.length > 0 && (
+            <p className="text-xs text-muted-foreground text-center mb-2">
+              Great work, {userName}! {training.sets.length} {training.sets.length === 1 ? 'set' : 'sets'} completed.
+            </p>
+          )}
+          <Button
+            variant={isActive ? "destructive" : "default"}
+            className="w-full"
+            onClick={handleFinishTraining}
+          >
+            {isActive ? 'Finish Training' : 'Update'}
+          </Button>
+        </div>
       </div>
     </div>
   );

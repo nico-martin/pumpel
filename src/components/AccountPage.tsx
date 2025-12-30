@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getDB } from '@/db/init';
 import { getAllExercises } from '@/db/exercises';
 import { getAllTrainings } from '@/db/trainings';
@@ -20,9 +21,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor, ChevronLeft } from 'lucide-react';
 
 export function AccountPage() {
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [userName, setUserName] = useState('');
   const [editingName, setEditingName] = useState(false);
@@ -261,8 +263,18 @@ export function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 pt-20">
-      <h1 className="text-2xl font-bold mb-6">Account</h1>
+    <div className="min-h-screen p-4 pt-5">
+      <div className="flex items-center gap-2 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/')}
+          className="shrink-0"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Account</h1>
+      </div>
 
       {/* User Profile */}
       <Card size="sm" className="mb-6">
@@ -272,7 +284,7 @@ export function AccountPage() {
         <CardContent>
           {editingName ? (
             <div className="space-y-3">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="edit-name">Name</Label>
                 <Input
                   id="edit-name"
@@ -372,6 +384,18 @@ export function AccountPage() {
             <p>
               <strong className="text-foreground">No Cost</strong> - Free forever, no subscriptions
               or hidden fees.
+            </p>
+            <p>
+              <strong className="text-foreground">Open Source</strong> - Available on{' '}
+              <a
+                href="https://github.com/nico-martin/pumpel"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                GitHub
+              </a>{' '}
+              under MIT license.
             </p>
           </div>
         </CardContent>

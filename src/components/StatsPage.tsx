@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllTrainings } from '@/db/trainings';
 import { getAllSets } from '@/db/sets';
 import { getAllExercises } from '@/db/exercises';
@@ -7,6 +8,7 @@ import type { Training, Set, Exercise } from '@/db/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ChevronLeft } from 'lucide-react';
 
 type DateRange = {
   start: number;
@@ -14,6 +16,7 @@ type DateRange = {
 };
 
 export function StatsPage() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
   const [dateRange, setDateRange] = useState<DateRange>(() => {
     const end = Date.now();
@@ -142,9 +145,19 @@ export function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 pt-20">
-      <h1 className="text-2xl font-bold mb-2">Statistics</h1>
-      <p className="text-muted-foreground mb-6">{userName}'s progress overview</p>
+    <div className="min-h-screen p-4 pt-5">
+      <div className="flex items-center gap-2 mb-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/')}
+          className="shrink-0"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Statistics</h1>
+      </div>
+      <p className="text-muted-foreground mb-6 ml-12">{userName}'s progress overview</p>
 
       {/* Date Range Selection */}
       <Card size="sm" className="mb-6">

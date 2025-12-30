@@ -2,6 +2,12 @@
 
 A privacy-focused fitness app that helps you track your gym workouts, sets, and weights. Built with React, TypeScript, and Tailwind CSS.
 
+> ## ⚠️ Development Notice
+>
+> **This entire app was built using [Claude Code](https://claude.com/claude-code) and Claude 4.5 Sonnet, with zero manual code editing.**
+>
+> This project was an experiment to see how far I could push AI-assisted development without writing a single line of code myself. Every component, database schema, feature, and style was implemented through natural language conversations with Claude Code. The entire codebase, from initial setup to deployment configuration, was generated and modified purely through AI assistance.
+> 
 ## Features
 
 - **100% Local** - All data stored locally in your browser using IndexedDB
@@ -239,10 +245,3 @@ Tested on:
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Contributing
-
-[Add contributing guidelines here]
-
-## Support
-
-[Add support information here]
