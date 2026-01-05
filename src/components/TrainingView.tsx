@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { updateTraining, deleteTraining } from '@/db/trainings';
 import { getTrainingWithDetails, getLastUsedWeightForExercise } from '@/db/queries';
 import { createSet, deleteSet } from '@/db/sets';
@@ -8,10 +8,10 @@ import { getUser } from '@/db/user';
 import type { Exercise, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ExerciseSelector } from '@/components/ExerciseSelector';
 import { Trash2, Info } from 'lucide-react';
+import { AddRound } from '@/components/trainingView/AddRound';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 interface TrainingViewProps {
@@ -48,28 +47,32 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     notes: '',
   });
   const [duration, setDuration] = useState(0);
-  const [showLastUsed, setShowLastUsed] = useState(false);
-  const [lastUsedData, setLastUsedData] = useState<{
-    weight: number;
-    reps: number;
-    date: number;
-  } | null>(null);
   const [showWarmUpCoolDown, setShowWarmUpCoolDown] = useState(false);
   const [warmUp, setWarmUp] = useState('');
   const [coolDown, setCoolDown] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  useEffect(() => {
-    loadTraining();
-    loadUserName();
-  }, [trainingId]);
-
-  const loadUserName = async () => {
+  const loadUserName = useCallback(async () => {
     const user = await getUser();
     if (user) {
       setUserName(user.name);
     }
-  };
+  }, []);
+
+  const loadTraining = useCallback(async () => {
+    const details = await getTrainingWithDetails(trainingId);
+    if (details) {
+      setTraining(details);
+      setWarmUp(details.warmUp || '');
+      setCoolDown(details.calmDown || '');
+      // Don't automatically select a set - let user click "Continue"
+    }
+  }, [trainingId]);
+
+  useEffect(() => {
+    loadTraining();
+    loadUserName();
+  }, [trainingId, loadTraining, loadUserName]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -80,20 +83,24 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     return () => clearInterval(interval);
   }, [training]);
 
-  useEffect(() => {
-    if (currentSetId && training) {
-      loadLastUsedWeight();
-    }
-  }, [currentSetId, training]);
-
-  const loadLastUsedWeight = async () => {
+  const loadLastUsedWeight = useCallback(async () => {
     if (!currentSetId || !training) return;
 
     const currentSet = training.sets.find((s) => s.id === currentSetId);
     if (!currentSet) return;
 
     try {
-      // Exclude current training to get weight from previous trainings
+      // First check if there are rounds in the current set
+      if (currentSet.rounds.length > 0) {
+        const lastRound = currentSet.rounds[currentSet.rounds.length - 1];
+        setCurrentRound((prev) => ({
+          ...prev,
+          weight: lastRound.weight.toString(),
+        }));
+        return;
+      }
+
+      // Otherwise, get weight from previous trainings
       const data = await getLastUsedWeightForExercise(currentSet.exerciseId, trainingId);
       if (data) {
         setCurrentRound((prev) => ({
@@ -110,17 +117,13 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     } catch (error) {
       console.error('Error loading last used weight:', error);
     }
-  };
+  }, [currentSetId, training, trainingId]);
 
-  const loadTraining = async () => {
-    const details = await getTrainingWithDetails(trainingId);
-    if (details) {
-      setTraining(details);
-      setWarmUp(details.warmUp || '');
-      setCoolDown(details.calmDown || '');
-      // Don't automatically select a set - let user click "Continue"
+  useEffect(() => {
+    if (currentSetId && training) {
+      loadLastUsedWeight();
     }
-  };
+  }, [currentSetId, training, loadLastUsedWeight]);
 
   const handleSelectExercise = async (exercise: Exercise) => {
     try {
@@ -221,19 +224,6 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       await loadTraining();
     } catch (error) {
       console.error('Error deleting round:', error);
-    }
-  };
-
-  const handleShowLastUsed = async () => {
-    if (!currentSet) return;
-
-    try {
-      // Exclude current training to show data from previous trainings
-      const data = await getLastUsedWeightForExercise(currentSet.exerciseId, trainingId);
-      setLastUsedData(data);
-      setShowLastUsed(true);
-    } catch (error) {
-      console.error('Error fetching last used data:', error);
     }
   };
 
@@ -353,33 +343,33 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Warm Up & Cool Down</AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="space-y-3 mt-2">
-                <div>
-                  <label className="text-xs font-medium text-foreground block mb-1">
-                    Warm Up
-                  </label>
-                  <Textarea
-                    placeholder="Describe your warm up routine..."
-                    value={warmUp}
-                    onChange={(e) => setWarmUp(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-foreground block mb-1">
-                    Cool Down
-                  </label>
-                  <Textarea
-                    placeholder="Describe your cool down routine..."
-                    value={coolDown}
-                    onChange={(e) => setCoolDown(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-3">
+            <div className="w-full">
+              <label className="text-xs font-medium text-foreground block mb-1">
+                Warm Up
+              </label>
+              <Textarea
+                placeholder="Describe your warm up routine..."
+                className="w-full"
+                value={warmUp}
+                onChange={(e) => setWarmUp(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-foreground block mb-1">
+                Cool Down
+              </label>
+              <Textarea
+                placeholder="Describe your cool down routine..."
+                className="w-full"
+                value={coolDown}
+                onChange={(e) => setCoolDown(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handleSaveWarmUpCoolDown}>
               Save
@@ -446,7 +436,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                         <span className="text-muted-foreground w-8">
                           #{roundIdx + 1}
                         </span>
-                        <span className="font-medium">{round.weight}kg</span>
+                        <span className="font-medium">{round.weight}{set.exercise.weightUnit}</span>
                         <span className="text-muted-foreground">×</span>
                         <span className="font-medium">{round.reps} reps</span>
                         {round.notes && (
@@ -490,114 +480,19 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           </CardContent>
         </Card>
       ) : currentSetId ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Add Round to {currentSet?.exercise.name}</span>
-              <AlertDialog open={showLastUsed} onOpenChange={setShowLastUsed}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    size="icon-xs"
-                    variant="ghost"
-                    onClick={handleShowLastUsed}
-                  >
-                    <Info className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Last Used</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {lastUsedData ? (
-                        <div className="space-y-2">
-                          <p>
-                            <strong>Weight:</strong> {lastUsedData.weight} kg
-                          </p>
-                          <p>
-                            <strong>Reps:</strong> {lastUsedData.reps}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {(() => {
-                              const date = new Date(lastUsedData.date);
-                              const day = String(date.getDate()).padStart(2, '0');
-                              const month = String(date.getMonth() + 1).padStart(2, '0');
-                              const year = date.getFullYear();
-                              return `${day}.${month}.${year}`;
-                            })()}
-                          </p>
-                        </div>
-                      ) : (
-                        <p>No previous data found for this exercise.</p>
-                      )}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction>Close</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">
-                    Weight (kg)
-                  </label>
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    placeholder="0"
-                    value={currentRound.weight}
-                    onChange={(e) =>
-                      setCurrentRound((prev) => ({ ...prev, weight: e.target.value }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">
-                    Reps
-                  </label>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={currentRound.reps}
-                    onChange={(e) =>
-                      setCurrentRound((prev) => ({ ...prev, reps: e.target.value }))
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
-                  Notes (optional)
-                </label>
-                <Textarea
-                  placeholder="How did it feel?"
-                  value={currentRound.notes}
-                  onChange={(e) =>
-                    setCurrentRound((prev) => ({ ...prev, notes: e.target.value }))
-                  }
-                  rows={2}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1"
-                  onClick={handleAddRound}
-                  disabled={!currentRound.weight || !currentRound.reps}
-                >
-                  Add Round
-                </Button>
-                <Button variant="outline" onClick={handleStartNewSet}>
-                  New Set
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <AddRound
+          exerciseName={currentSet?.exercise.name || ''}
+          exerciseId={currentSet?.exerciseId || ''}
+          trainingId={trainingId}
+          weightUnit={currentSet?.exercise.weightUnit || 'kg'}
+          steps={currentSet?.exercise.steps || 1}
+          currentRound={currentRound}
+          onRoundChange={(field, value) =>
+            setCurrentRound((prev) => ({ ...prev, [field]: value }))
+          }
+          onAddRound={handleAddRound}
+          onStartNewSet={handleStartNewSet}
+        />
       ) : (
         <Button className="w-full" onClick={handleStartNewSet}>
           Start New Set

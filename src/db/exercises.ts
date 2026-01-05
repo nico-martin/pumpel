@@ -7,6 +7,8 @@ export async function createExercise(input: ExerciseInput): Promise<Exercise> {
   const db = await getDB();
   const exercise: Exercise = {
     ...input,
+    weightUnit: input.weightUnit || 'kg',
+    steps: input.steps || 1,
     id: generateUUID(),
     createdAt: getCurrentTimestamp(),
   };

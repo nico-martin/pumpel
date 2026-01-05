@@ -65,10 +65,6 @@ export default defineConfig({
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/]
-      },
-      devOptions: {
-        enabled: true,
-        type: 'module'
       }
     })
   ],

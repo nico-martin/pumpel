@@ -34,7 +34,7 @@ export interface WorkoutTrackerDB {
 }
 
 const DB_NAME = 'workoutTrackerDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbInstance: IDBPDatabase<WorkoutTrackerDB> | null = null;
 
@@ -44,7 +44,7 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
   }
 
   dbInstance = await openDB<WorkoutTrackerDB>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion, _newVersion, transaction) {
 
       // Create exercises store
       if (!db.objectStoreNames.contains('exercises')) {
@@ -85,6 +85,23 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
       if (!db.objectStoreNames.contains('user')) {
         db.createObjectStore('user', {
           keyPath: 'id',
+        });
+      }
+
+      // Migrate existing exercises to add weightUnit and steps (version 3)
+      if (oldVersion < 3) {
+        const exercisesStore = transaction.objectStore('exercises');
+        exercisesStore.openCursor().then(function updateExercise(cursor): Promise<void> | undefined {
+          if (!cursor) return;
+          const exercise = cursor.value as Exercise;
+          if (!exercise.weightUnit) {
+            exercise.weightUnit = 'kg';
+          }
+          if (!exercise.steps) {
+            exercise.steps = 1;
+          }
+          cursor.update(exercise);
+          return cursor.continue().then(updateExercise);
         });
       }
     },

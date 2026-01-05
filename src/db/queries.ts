@@ -140,6 +140,42 @@ export async function getLastUsedWeightForExercise(
   };
 }
 
+// Get the entire last set (all rounds) for a specific exercise
+export async function getLastSetForExercise(
+  exerciseId: string,
+  excludeTrainingId?: string
+): Promise<{ rounds: Round[]; date: number } | null> {
+  const exerciseHistory = await getExerciseHistory(exerciseId);
+  if (!exerciseHistory || exerciseHistory.history.length === 0) {
+    return null;
+  }
+
+  // Filter out the current training if excludeTrainingId is provided
+  const filteredHistory = excludeTrainingId
+    ? exerciseHistory.history.filter((h) => h.training.id !== excludeTrainingId)
+    : exerciseHistory.history;
+
+  if (filteredHistory.length === 0) {
+    return null;
+  }
+
+  // Get the most recent training (excluding current if specified)
+  const mostRecentTraining = filteredHistory[0];
+
+  // Get the last set from that training
+  const lastSet = mostRecentTraining.sets[mostRecentTraining.sets.length - 1];
+
+  // Return all rounds from that set
+  if (lastSet.rounds.length === 0) {
+    return null;
+  }
+
+  return {
+    rounds: lastSet.rounds,
+    date: mostRecentTraining.training.startTime,
+  };
+}
+
 // Helper to add a complete training session with sets and rounds
 export interface CompleteTrainingInput {
   training: TrainingInput;

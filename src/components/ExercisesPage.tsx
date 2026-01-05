@@ -6,15 +6,6 @@ import { getUser } from '@/db/user';
 import type { Exercise } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,17 +17,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Trash2, Edit, ChevronLeft } from 'lucide-react';
-
-const BODY_PARTS = [
-  'Chest',
-  'Back',
-  'Shoulders',
-  'Arms',
-  'Legs',
-  'Core',
-  'Cardio',
-  'Full Body',
-];
+import { ExerciseForm } from '@/components/exercises/ExerciseForm';
 
 export function ExercisesPage() {
   const navigate = useNavigate();
@@ -47,6 +28,8 @@ export function ExercisesPage() {
   const [editName, setEditName] = useState('');
   const [editBodyPart, setEditBodyPart] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editWeightUnit, setEditWeightUnit] = useState<'kg' | 'lb'>('kg');
+  const [editSteps, setEditSteps] = useState('1');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -79,16 +62,26 @@ export function ExercisesPage() {
     setEditName(exercise.name);
     setEditBodyPart(exercise.bodyPart || '');
     setEditDescription(exercise.description || '');
+    setEditWeightUnit(exercise.weightUnit || 'kg');
+    setEditSteps(exercise.steps?.toString() || '1');
   };
 
   const handleSaveEdit = async () => {
     if (!editingExercise || !editName.trim()) return;
+
+    const steps = parseFloat(editSteps);
+    if (isNaN(steps) || steps <= 0) {
+      alert('Steps must be a positive number');
+      return;
+    }
 
     try {
       await updateExercise(editingExercise.id, {
         name: editName.trim(),
         bodyPart: editBodyPart.trim() || undefined,
         description: editDescription.trim() || undefined,
+        weightUnit: editWeightUnit,
+        steps: steps,
       });
       setEditingExercise(null);
       await loadExercises();
@@ -157,11 +150,15 @@ export function ExercisesPage() {
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex flex-col items-start gap-0.5">
                     <span>{exercise.name}</span>
-                    {exercise.bodyPart && (
-                      <span className="text-xs text-muted-foreground font-normal">
-                        {exercise.bodyPart}
-                      </span>
-                    )}
+                    <div className="flex gap-2 text-xs text-muted-foreground font-normal">
+                      {exercise.bodyPart && (
+                        <>
+                          <span>{exercise.bodyPart}</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      <span>{exercise.weightUnit} / {exercise.steps} step</span>
+                    </div>
                   </div>
                   <div className="flex gap-1">
                     <Button
@@ -197,46 +194,20 @@ export function ExercisesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Edit Exercise</AlertDialogTitle>
           </AlertDialogHeader>
-          <div className="space-y-3 mt-2">
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1 text-left">
-                Name
-              </label>
-              <Input
-                placeholder="Exercise name"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1 text-left">
-                Body Part
-              </label>
-              <Select value={editBodyPart} onValueChange={setEditBodyPart}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select body part" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BODY_PARTS.map((part) => (
-                    <SelectItem key={part} value={part}>
-                      {part}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1 text-left">
-                Description (optional)
-              </label>
-              <Textarea
-                placeholder="Exercise instructions or notes..."
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
+          <div className="mt-2">
+            <ExerciseForm
+              name={editName}
+              bodyPart={editBodyPart}
+              weightUnit={editWeightUnit}
+              steps={editSteps}
+              description={editDescription}
+              onNameChange={setEditName}
+              onBodyPartChange={setEditBodyPart}
+              onWeightUnitChange={setEditWeightUnit}
+              onStepsChange={setEditSteps}
+              onDescriptionChange={setEditDescription}
+              autoFocusName={true}
+            />
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

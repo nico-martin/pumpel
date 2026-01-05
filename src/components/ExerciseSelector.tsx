@@ -3,14 +3,6 @@ import { getAllExercises, createExercise } from '@/db/exercises';
 import type { Exercise } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,17 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-const BODY_PARTS = [
-  'Chest',
-  'Back',
-  'Shoulders',
-  'Arms',
-  'Legs',
-  'Core',
-  'Cardio',
-  'Full Body',
-];
+import { ExerciseForm } from '@/components/exercises/ExerciseForm';
 
 interface ExerciseSelectorProps {
   onSelect: (exercise: Exercise) => void;
@@ -44,6 +26,8 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newExerciseDescription, setNewExerciseDescription] = useState('');
   const [newExerciseBodyPart, setNewExerciseBodyPart] = useState('');
+  const [newExerciseWeightUnit, setNewExerciseWeightUnit] = useState<'kg' | 'lb'>('kg');
+  const [newExerciseSteps, setNewExerciseSteps] = useState('1');
 
   useEffect(() => {
     loadExercises();
@@ -66,17 +50,27 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
     setNewExerciseName(searchValue.trim());
     setNewExerciseDescription('');
     setNewExerciseBodyPart('');
+    setNewExerciseWeightUnit('kg');
+    setNewExerciseSteps('1');
     setShowCreateForm(true);
   };
 
   const handleCreateNew = async () => {
     if (!newExerciseName.trim()) return;
 
+    const steps = parseFloat(newExerciseSteps);
+    if (isNaN(steps) || steps <= 0) {
+      alert('Steps must be a positive number');
+      return;
+    }
+
     try {
       const newExercise = await createExercise({
         name: newExerciseName.trim(),
         description: newExerciseDescription.trim() || undefined,
         bodyPart: newExerciseBodyPart.trim() || undefined,
+        weightUnit: newExerciseWeightUnit,
+        steps: steps,
       });
       setExercises((prev) => [...prev, newExercise]);
       onSelect(newExercise);
@@ -123,11 +117,15 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
                 >
                   <div className="flex flex-col items-start gap-0.5">
                     <span>{exercise.name}</span>
-                    {exercise.bodyPart && (
-                      <span className="text-xs text-muted-foreground">
-                        {exercise.bodyPart}
-                      </span>
-                    )}
+                    <div className="flex gap-2 text-xs text-muted-foreground">
+                      {exercise.bodyPart && (
+                        <>
+                          <span>{exercise.bodyPart}</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      <span>{exercise.weightUnit} / {exercise.steps} step</span>
+                    </div>
                   </div>
                 </Button>
               </div>
@@ -145,46 +143,20 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
           <AlertDialogHeader>
             <AlertDialogTitle>Create New Exercise</AlertDialogTitle>
           </AlertDialogHeader>
-          <div className="space-y-3 mt-2">
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1 text-left">
-                Name
-              </label>
-              <Input
-                placeholder="Exercise name"
-                value={newExerciseName}
-                onChange={(e) => setNewExerciseName(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1 text-left">
-                Body Part
-              </label>
-              <Select value={newExerciseBodyPart} onValueChange={setNewExerciseBodyPart}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select body part" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BODY_PARTS.map((part) => (
-                    <SelectItem key={part} value={part}>
-                      {part}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1 text-left">
-                Description (optional)
-              </label>
-              <Textarea
-                placeholder="Exercise instructions or notes..."
-                value={newExerciseDescription}
-                onChange={(e) => setNewExerciseDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
+          <div className="mt-2">
+            <ExerciseForm
+              name={newExerciseName}
+              bodyPart={newExerciseBodyPart}
+              weightUnit={newExerciseWeightUnit}
+              steps={newExerciseSteps}
+              description={newExerciseDescription}
+              onNameChange={setNewExerciseName}
+              onBodyPartChange={setNewExerciseBodyPart}
+              onWeightUnitChange={setNewExerciseWeightUnit}
+              onStepsChange={setNewExerciseSteps}
+              onDescriptionChange={setNewExerciseDescription}
+              autoFocusName={true}
+            />
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
