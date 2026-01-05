@@ -61,7 +61,7 @@ export function Navigation() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <div className="px-2 py-1.5 text-[0.6rem] text-muted-foreground flex justify-between items-center">
-              <span>Version {packageJson.version}</span><span>|</span><a href="https://github.com/nico-martin/pumpel/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a><span>|</span><a href="https://github.com/nico-martin/pumpel/" target="_blank" rel="noopener noreferrer">GitHub</a>
+              <span>Version {packageJson.version}</span><span>::</span><a href="https://github.com/nico-martin/pumpel/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a><span>::</span><a href="https://github.com/nico-martin/pumpel/" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
