@@ -5,8 +5,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Menu, Home, Dumbbell, BarChart3, User } from 'lucide-react';
+import packageJson from '../../package.json';
 
 export function Navigation() {
   const navigate = useNavigate();
@@ -57,6 +59,10 @@ export function Navigation() {
               <User className="h-4 w-4" />
               Account
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5 text-[0.6rem] text-muted-foreground flex justify-between items-center">
+              <span>Version {packageJson.version}</span><span>|</span><a href="https://github.com/nico-martin/pumpel/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a><span>|</span><a href="https://github.com/nico-martin/pumpel/" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
