@@ -18,37 +18,23 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
 
   const data = event.notification.data;
 
-  if (event.action === 'stop') {
-    // Send message to all clients to stop training
-    event.waitUntil(
-      self.clients.matchAll({ type: 'window' }).then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({
-            type: 'stop-training',
-            trainingId: data.trainingId
-          });
-        });
+  // Open or focus the app
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Try to find an already open window
+        for (const client of clientList) {
+          if ('focus' in client) {
+            return client.focus();
+          }
+        }
+        // If no window is open, open a new one
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(data.url || '/');
+        }
       })
-    );
-  } else {
-    // Open or focus the app
-    event.waitUntil(
-      self.clients
-        .matchAll({ type: 'window', includeUncontrolled: true })
-        .then((clientList) => {
-          // Try to find an already open window
-          for (const client of clientList) {
-            if ('focus' in client) {
-              return client.focus();
-            }
-          }
-          // If no window is open, open a new one
-          if (self.clients.openWindow) {
-            return self.clients.openWindow(data.url || '/');
-          }
-        })
-    );
-  }
+  );
 });
 
 // Listen for messages from the app

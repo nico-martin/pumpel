@@ -66,8 +66,8 @@ export async function showTrainingNotification(
 
     const options: ExtendedNotificationOptions = {
       body: `Training in progress - ${timeStr}`,
-      icon: '/favicon.svg',
-      badge: '/favicon.svg',
+      icon: '/badge.png',
+      badge: '/badge.png',
       tag: TRAINING_NOTIFICATION_TAG,
       requireInteraction: true,
       silent: true,
@@ -78,8 +78,7 @@ export async function showTrainingNotification(
         url: '/'
       },
       actions: [
-        { action: 'open', title: 'Open' },
-        { action: 'stop', title: 'Finish' }
+        { action: 'open', title: 'Open' }
       ]
     };
 

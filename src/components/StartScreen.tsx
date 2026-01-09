@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining, updateTraining } from '@/db/trainings';
+import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining } from '@/db/trainings';
 import { getTrainingWithDetails } from '@/db/queries';
 import { deleteSet } from '@/db/sets';
 import { deleteRoundsBySetId } from '@/db/rounds';
@@ -37,26 +37,10 @@ export function StartScreen() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const notificationIntervalRef = useRef<number | null>(null);
 
-  // Setup notifications and listen for service worker messages
+  // Setup notifications
   useEffect(() => {
     setupTrainingNotifications();
-
-    // Listen for messages from service worker (e.g., stop training action)
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.data && event.data.type === 'stop-training') {
-        const trainingId = event.data.trainingId;
-        if (trainingId && activeTraining?.id === trainingId) {
-          await handleFinishTrainingFromNotification(trainingId);
-        }
-      }
-    };
-
-    navigator.serviceWorker?.addEventListener('message', handleMessage);
-
-    return () => {
-      navigator.serviceWorker?.removeEventListener('message', handleMessage);
-    };
-  }, [activeTraining]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -162,20 +146,6 @@ export function StartScreen() {
     setActiveTraining(null);
     setSelectedTrainingId(null); // Clear selected training to go back to list
     loadData(); // Reload to show the newly completed training in the list
-  };
-
-  // Handle training finish from notification action
-  const handleFinishTrainingFromNotification = async (trainingId: string) => {
-    try {
-      await updateTraining(trainingId, {
-        endTime: Date.now(),
-      });
-      stopNotificationUpdates();
-      setActiveTraining(null);
-      await loadData();
-    } catch (error) {
-      console.error('Error finishing training from notification:', error);
-    }
   };
 
   const handleBackToList = () => {
