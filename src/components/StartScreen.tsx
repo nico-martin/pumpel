@@ -53,6 +53,20 @@ export function StartScreen() {
     };
   }, []);
 
+  // Check if app was opened from a notification
+  useEffect(() => {
+    if (window.location.hash === '#from-training-notification' && activeTraining) {
+      // Show notification immediately
+      if (hasNotificationPermission()) {
+        const elapsed = Math.floor((Date.now() - activeTraining.startTime) / 1000 / 60);
+        showTrainingNotification(activeTraining.id, activeTraining.startTime, elapsed);
+      }
+
+      // Clear the hash
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }, [activeTraining]);
+
   const loadData = async () => {
     try {
       setLoading(true);

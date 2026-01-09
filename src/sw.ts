@@ -16,7 +16,7 @@ clientsClaim();
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close();
 
-  const data = event.notification.data;
+  const urlWithHash = '/#from-training-notification';
 
   // Open or focus the app
   event.waitUntil(
@@ -26,12 +26,16 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
         // Try to find an already open window
         for (const client of clientList) {
           if ('focus' in client) {
+            // Navigate to URL with hash to signal notification click
+            if ('navigate' in client) {
+              client.navigate(urlWithHash);
+            }
             return client.focus();
           }
         }
-        // If no window is open, open a new one
+        // If no window is open, open a new one with the hash
         if (self.clients.openWindow) {
-          return self.clients.openWindow(data.url || '/');
+          return self.clients.openWindow(urlWithHash);
         }
       })
   );
