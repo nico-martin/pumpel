@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining } from '@/db/trainings';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining, updateTraining } from '@/db/trainings';
 import { getTrainingWithDetails } from '@/db/queries';
 import { deleteSet } from '@/db/sets';
 import { deleteRoundsBySetId } from '@/db/rounds';
@@ -19,6 +19,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  setupTrainingNotifications,
+  showTrainingNotification,
+  closeTrainingNotifications,
+  hasNotificationPermission
+} from '@/services/trainingNotifications';
 
 export function StartScreen() {
   const [userName, setUserName] = useState<string>('');
@@ -29,9 +35,38 @@ export function StartScreen() {
   const [selectedTrainingId, setSelectedTrainingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const notificationIntervalRef = useRef<number | null>(null);
+
+  // Setup notifications and listen for service worker messages
+  useEffect(() => {
+    setupTrainingNotifications();
+
+    // Listen for messages from service worker (e.g., stop training action)
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data && event.data.type === 'stop-training') {
+        const trainingId = event.data.trainingId;
+        if (trainingId && activeTraining?.id === trainingId) {
+          await handleFinishTrainingFromNotification(trainingId);
+        }
+      }
+    };
+
+    navigator.serviceWorker?.addEventListener('message', handleMessage);
+
+    return () => {
+      navigator.serviceWorker?.removeEventListener('message', handleMessage);
+    };
+  }, [activeTraining]);
 
   useEffect(() => {
     loadData();
+
+    // Cleanup on unmount
+    return () => {
+      if (notificationIntervalRef.current) {
+        clearInterval(notificationIntervalRef.current);
+      }
+    };
   }, []);
 
   const loadData = async () => {
@@ -50,6 +85,11 @@ export function StartScreen() {
       setActiveTraining(training);
       setRecentTrainings(recent);
 
+      // If there's an active training, start notifications
+      if (training) {
+        startNotificationUpdates(training.id, training.startTime);
+      }
+
       // Load details for each training
       const detailsMap = new Map<string, TrainingWithDetails>();
       for (const t of recent) {
@@ -66,6 +106,36 @@ export function StartScreen() {
     }
   };
 
+  // Start notification updates for active training
+  const startNotificationUpdates = useCallback((trainingId: string, startTime: number) => {
+    // Clear any existing interval
+    if (notificationIntervalRef.current) {
+      clearInterval(notificationIntervalRef.current);
+    }
+
+    // Show initial notification
+    const showNotification = () => {
+      if (hasNotificationPermission()) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000 / 60);
+        showTrainingNotification(trainingId, startTime, elapsed);
+      }
+    };
+
+    showNotification();
+
+    // Update notification every minute
+    notificationIntervalRef.current = setInterval(showNotification, 60000);
+  }, []);
+
+  // Stop notification updates and close notifications
+  const stopNotificationUpdates = useCallback(() => {
+    if (notificationIntervalRef.current) {
+      clearInterval(notificationIntervalRef.current);
+      notificationIntervalRef.current = null;
+    }
+    closeTrainingNotifications();
+  }, []);
+
   const handleStartTraining = async () => {
     // Prevent starting a new training if one is already active
     if (activeTraining) {
@@ -79,15 +149,33 @@ export function StartScreen() {
       });
       setActiveTraining(newTraining);
       setSelectedTrainingId(newTraining.id); // Navigate to the new training
+
+      // Start showing notifications
+      startNotificationUpdates(newTraining.id, newTraining.startTime);
     } catch (error) {
       console.error('Error starting training:', error);
     }
   };
 
   const handleTrainingEnd = () => {
+    stopNotificationUpdates();
     setActiveTraining(null);
     setSelectedTrainingId(null); // Clear selected training to go back to list
     loadData(); // Reload to show the newly completed training in the list
+  };
+
+  // Handle training finish from notification action
+  const handleFinishTrainingFromNotification = async (trainingId: string) => {
+    try {
+      await updateTraining(trainingId, {
+        endTime: Date.now(),
+      });
+      stopNotificationUpdates();
+      setActiveTraining(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error finishing training from notification:', error);
+    }
   };
 
   const handleBackToList = () => {
@@ -133,6 +221,7 @@ export function StartScreen() {
 
       // Clear active training if it was deleted
       if (activeTraining?.id === deleteConfirmId) {
+        stopNotificationUpdates();
         setActiveTraining(null);
       }
 
@@ -268,8 +357,8 @@ export function StartScreen() {
                     {hasExercises && (
                       <div className="space-y-2">
                         {visibleSets.map((set) => {
-                          const avgWeight = set.rounds.length > 0
-                            ? (set.rounds.reduce((sum, r) => sum + r.weight, 0) / set.rounds.length).toFixed(1)
+                          const maxWeight = set.rounds.length > 0
+                            ? Math.max(...set.rounds.map(r => r.weight)).toFixed(1)
                             : '0';
                           const totalReps = set.rounds.reduce((sum, r) => sum + r.reps, 0);
 
@@ -277,7 +366,7 @@ export function StartScreen() {
                             <div key={set.id} className="text-xs flex items-center justify-between">
                               <span className="font-medium">{set.exercise.name}</span>
                               <span className="text-muted-foreground">
-                                {set.rounds.length} × {avgWeight}kg × {totalReps} reps
+                                {set.rounds.length} × {maxWeight}kg × {totalReps} reps
                               </span>
                             </div>
                           );

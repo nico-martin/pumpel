@@ -9,8 +9,9 @@ import type { Exercise, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { ExerciseSelector } from '@/components/ExerciseSelector';
-import { Trash2, Info } from 'lucide-react';
+import { Trash2, Edit, Check } from 'lucide-react';
 import { AddRound } from '@/components/trainingView/AddRound';
 import {
   AlertDialog,
@@ -47,9 +48,17 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     notes: '',
   });
   const [duration, setDuration] = useState(0);
-  const [showWarmUpCoolDown, setShowWarmUpCoolDown] = useState(false);
   const [warmUp, setWarmUp] = useState('');
   const [coolDown, setCoolDown] = useState('');
+  const [isEditingWarmUp, setIsEditingWarmUp] = useState(false);
+  const [isEditingCoolDown, setIsEditingCoolDown] = useState(false);
+  const [editWarmUpValue, setEditWarmUpValue] = useState('');
+  const [editCoolDownValue, setEditCoolDownValue] = useState('');
+  const [isEditingDateTime, setIsEditingDateTime] = useState(false);
+  const [editStartDate, setEditStartDate] = useState('');
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndDate, setEditEndDate] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadUserName = useCallback(async () => {
@@ -227,16 +236,85 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     }
   };
 
-  const handleSaveWarmUpCoolDown = async () => {
+  const handleStartEditWarmUp = () => {
+    setEditWarmUpValue(warmUp);
+    setIsEditingWarmUp(true);
+  };
+
+  const handleStartEditCoolDown = () => {
+    setEditCoolDownValue(coolDown);
+    setIsEditingCoolDown(true);
+  };
+
+  const handleSaveWarmUp = async () => {
     try {
       await updateTraining(trainingId, {
-        warmUp: warmUp || undefined,
-        calmDown: coolDown || undefined,
+        warmUp: editWarmUpValue || undefined,
       });
-      setShowWarmUpCoolDown(false);
+      setIsEditingWarmUp(false);
       await loadTraining();
     } catch (error) {
-      console.error('Error saving warm up/cool down:', error);
+      console.error('Error saving warm up:', error);
+    }
+  };
+
+  const handleSaveCoolDown = async () => {
+    try {
+      await updateTraining(trainingId, {
+        calmDown: editCoolDownValue || undefined,
+      });
+      setIsEditingCoolDown(false);
+      await loadTraining();
+    } catch (error) {
+      console.error('Error saving cool down:', error);
+    }
+  };
+
+  const formatDateForInput = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toISOString().split('T')[0];
+  };
+
+  const formatTimeForInput = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  const handleStartEditDateTime = () => {
+    if (!training) return;
+    setEditStartDate(formatDateForInput(training.startTime));
+    setEditStartTime(formatTimeForInput(training.startTime));
+    if (training.endTime > 0) {
+      setEditEndDate(formatDateForInput(training.endTime));
+      setEditEndTime(formatTimeForInput(training.endTime));
+    }
+    setIsEditingDateTime(true);
+  };
+
+  const handleSaveDateTime = async () => {
+    try {
+      const [startHours, startMinutes] = editStartTime.split(':').map(Number);
+      const startDate = new Date(editStartDate);
+      startDate.setHours(startHours, startMinutes, 0, 0);
+
+      const updates: { startTime: number; endTime?: number } = {
+        startTime: startDate.getTime(),
+      };
+
+      if (!isActive && editEndDate && editEndTime) {
+        const [endHours, endMinutes] = editEndTime.split(':').map(Number);
+        const endDate = new Date(editEndDate);
+        endDate.setHours(endHours, endMinutes, 0, 0);
+        updates.endTime = endDate.getTime();
+      }
+
+      await updateTraining(trainingId, updates);
+      setIsEditingDateTime(false);
+      await loadTraining();
+    } catch (error) {
+      console.error('Error saving date/time:', error);
     }
   };
 
@@ -300,9 +378,9 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
               <Button
                 size="icon-xs"
                 variant="ghost"
-                onClick={() => setShowWarmUpCoolDown(true)}
+                onClick={isEditingDateTime ? handleSaveDateTime : handleStartEditDateTime}
               >
-                <Info className="h-4 w-4" />
+                {isEditingDateTime ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
               </Button>
               <Button
                 size="icon-xs"
@@ -313,70 +391,58 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
               </Button>
             </div>
           </CardTitle>
-          <CardDescription>
-            {isActive ? (
-              <>Started at {formatTime(training.startTime)} • {duration} min</>
-            ) : (
-              <>{formatDate(training.startTime)} • {formatTime(training.startTime)} - {formatTime(training.endTime)}</>
-            )}
-          </CardDescription>
+          {isEditingDateTime ? (
+            <CardContent className="pt-3 space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium block mb-1">Start Date</label>
+                  <Input
+                    type="date"
+                    value={editStartDate}
+                    onChange={(e) => setEditStartDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium block mb-1">Start Time</label>
+                  <Input
+                    type="time"
+                    value={editStartTime}
+                    onChange={(e) => setEditStartTime(e.target.value)}
+                  />
+                </div>
+              </div>
+              {!isActive && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs font-medium block mb-1">End Date</label>
+                    <Input
+                      type="date"
+                      value={editEndDate}
+                      onChange={(e) => setEditEndDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium block mb-1">End Time</label>
+                    <Input
+                      type="time"
+                      value={editEndTime}
+                      onChange={(e) => setEditEndTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          ) : (
+            <CardDescription>
+              {isActive ? (
+                <>Started at {formatTime(training.startTime)} • {duration} min</>
+              ) : (
+                <>{formatDate(training.startTime)} • {formatTime(training.startTime)} - {formatTime(training.endTime)}</>
+              )}
+            </CardDescription>
+          )}
         </CardHeader>
-        {(training.warmUp || training.calmDown) && (
-          <CardContent>
-            {training.warmUp && (
-              <div className="mb-2">
-                <p className="text-xs font-medium">Warm Up</p>
-                <p className="text-xs text-muted-foreground">{training.warmUp}</p>
-              </div>
-            )}
-            {training.calmDown && (
-              <div>
-                <p className="text-xs font-medium">Cool Down</p>
-                <p className="text-xs text-muted-foreground">{training.calmDown}</p>
-              </div>
-            )}
-          </CardContent>
-        )}
       </Card>
-
-      <AlertDialog open={showWarmUpCoolDown} onOpenChange={setShowWarmUpCoolDown}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Warm Up & Cool Down</AlertDialogTitle>
-          </AlertDialogHeader>
-          <div className="space-y-3">
-            <div className="w-full">
-              <label className="text-xs font-medium text-foreground block mb-1">
-                Warm Up
-              </label>
-              <Textarea
-                placeholder="Describe your warm up routine..."
-                className="w-full"
-                value={warmUp}
-                onChange={(e) => setWarmUp(e.target.value)}
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1">
-                Cool Down
-              </label>
-              <Textarea
-                placeholder="Describe your cool down routine..."
-                className="w-full"
-                value={coolDown}
-                onChange={(e) => setCoolDown(e.target.value)}
-                rows={3}
-              />
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleSaveWarmUpCoolDown}>
-              Save
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
@@ -395,9 +461,40 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
         </AlertDialogContent>
       </AlertDialog>
 
-      {training.sets.length > 0 && (
-        <div className="mb-4 space-y-3">
-          {training.sets.map((set, idx) => (
+      <div className="mb-4 space-y-3">
+        {/* Warm Up Card */}
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Warm Up</span>
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                onClick={isEditingWarmUp ? handleSaveWarmUp : handleStartEditWarmUp}
+              >
+                {isEditingWarmUp ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isEditingWarmUp ? (
+              <Textarea
+                placeholder="Describe your warm up routine..."
+                className="w-full"
+                value={editWarmUpValue}
+                onChange={(e) => setEditWarmUpValue(e.target.value)}
+                rows={3}
+              />
+            ) : (
+              <p className="text-xs text-muted-foreground whitespace-pre-wrap">
+                {warmUp || 'Click edit to add warm up routine'}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Exercise Sets */}
+        {training.sets.map((set, idx) => (
             <Card
               key={set.id}
               size="sm"
@@ -459,8 +556,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
               )}
             </Card>
           ))}
-        </div>
-      )}
+      </div>
 
       {showExerciseSelector ? (
         <Card>
@@ -498,6 +594,37 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           Start New Set
         </Button>
       )}
+
+      {/* Cool Down Card */}
+      <Card size="sm" className="mt-4">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Cool Down</span>
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={isEditingCoolDown ? handleSaveCoolDown : handleStartEditCoolDown}
+            >
+              {isEditingCoolDown ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isEditingCoolDown ? (
+            <Textarea
+              placeholder="Describe your cool down routine..."
+              className="w-full"
+              value={editCoolDownValue}
+              onChange={(e) => setEditCoolDownValue(e.target.value)}
+              rows={3}
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground whitespace-pre-wrap">
+              {coolDown || 'Click edit to add cool down routine'}
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
         <div className="mx-auto max-w-2xl">
