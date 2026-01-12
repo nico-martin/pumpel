@@ -4,6 +4,7 @@ import { StartScreen } from '@/components/StartScreen';
 import { ExercisesPage } from '@/components/ExercisesPage';
 import { StatsPage } from '@/components/StatsPage';
 import { AccountPage } from '@/components/AccountPage';
+import { TrainingPage } from '@/pages/TrainingPage';
 import { Navigation } from '@/components/Navigation';
 import { NameSetupModal } from '@/components/NameSetupModal';
 import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt';
@@ -55,6 +56,7 @@ export function App() {
         <Navigation />
         <Routes>
           <Route path="/" element={<StartScreen />} />
+          <Route path="/training/:id" element={<TrainingPage />} />
           <Route path="/exercises" element={<ExercisesPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/account" element={<AccountPage />} />

@@ -75,7 +75,7 @@ export async function showTrainingNotification(
         type: 'training-active',
         trainingId,
         startTime,
-        url: '/'
+        url: `/training/${trainingId}`
       },
       actions: [
         { action: 'open', title: 'Open' }

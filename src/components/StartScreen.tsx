@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining } from '@/db/trainings';
 import { getTrainingWithDetails } from '@/db/queries';
 import { deleteSet } from '@/db/sets';
@@ -7,7 +8,6 @@ import { getUser } from '@/db/user';
 import type { Training, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { TrainingView } from '@/components/TrainingView';
 import { Trash2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -27,12 +27,12 @@ import {
 } from '@/services/trainingNotifications';
 
 export function StartScreen() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
   const [activeTraining, setActiveTraining] = useState<Training | null>(null);
   const [recentTrainings, setRecentTrainings] = useState<Training[]>([]);
   const [trainingDetails, setTrainingDetails] = useState<Map<string, TrainingWithDetails>>(new Map());
   const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(new Set());
-  const [selectedTrainingId, setSelectedTrainingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const notificationIntervalRef = useRef<number | null>(null);
@@ -53,19 +53,6 @@ export function StartScreen() {
     };
   }, []);
 
-  // Check if app was opened from a notification
-  useEffect(() => {
-    if (window.location.hash === '#from-training-notification' && activeTraining) {
-      // Show notification immediately
-      if (hasNotificationPermission()) {
-        const elapsed = Math.floor((Date.now() - activeTraining.startTime) / 1000 / 60);
-        showTrainingNotification(activeTraining.id, activeTraining.startTime, elapsed);
-      }
-
-      // Clear the hash
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-  }, [activeTraining]);
 
   const loadData = async () => {
     try {
@@ -146,26 +133,17 @@ export function StartScreen() {
         endTime: 0, // Active training has endTime set to 0
       });
       setActiveTraining(newTraining);
-      setSelectedTrainingId(newTraining.id); // Navigate to the new training
 
       // Start showing notifications
       startNotificationUpdates(newTraining.id, newTraining.startTime);
+
+      // Navigate to the new training
+      navigate(`/training/${newTraining.id}`);
     } catch (error) {
       console.error('Error starting training:', error);
     }
   };
 
-  const handleTrainingEnd = () => {
-    stopNotificationUpdates();
-    setActiveTraining(null);
-    setSelectedTrainingId(null); // Clear selected training to go back to list
-    loadData(); // Reload to show the newly completed training in the list
-  };
-
-  const handleBackToList = () => {
-    setSelectedTrainingId(null);
-    loadData();
-  };
 
   const toggleExpanded = (trainingId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -243,20 +221,6 @@ export function StartScreen() {
     );
   }
 
-  if (selectedTrainingId) {
-    // Check if selected training is active
-    const isSelectedActive = activeTraining?.id === selectedTrainingId;
-
-    return (
-      <TrainingView
-        trainingId={selectedTrainingId}
-        onTrainingEnd={handleTrainingEnd}
-        onBack={handleBackToList}
-        isActive={isSelectedActive}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen p-4 space-y-6">
       <div className="mt-1">
@@ -287,8 +251,8 @@ export function StartScreen() {
               : formatDuration(training.startTime, training.endTime);
 
             const handleClick = () => {
-              // Open TrainingView for all trainings (active and completed)
-              setSelectedTrainingId(training.id);
+              // Navigate to training page
+              navigate(`/training/${training.id}`);
             };
 
             const details = trainingDetails.get(training.id);

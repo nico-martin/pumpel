@@ -16,7 +16,15 @@ clientsClaim();
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close();
 
-  const urlWithHash = '/#from-training-notification';
+  // Extract training ID from notification data
+  const notificationData = event.notification.data || {};
+  const trainingId = notificationData.trainingId;
+
+  // Build URL - navigate to training page if we have an ID, otherwise go to home
+  // Use query parameter instead of hash since HashRouter already uses #
+  const urlWithHash = trainingId
+    ? `/#/training/${trainingId}?from=notification`
+    : '/#?from=notification';
 
   // Open or focus the app
   event.waitUntil(
