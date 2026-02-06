@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { getAllTrainings } from '@/db/trainings';
 import { getAllSets } from '@/db/sets';
 import { getAllExercises } from '@/db/exercises';
+import { getAllRounds } from '@/db/rounds';
 import { getUser } from '@/db/user';
-import type { Training, Set, Exercise } from '@/db/types';
+import type { Training, Set, Exercise, Round } from '@/db/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Copy, Check } from 'lucide-react';
 
 type DateRange = {
   start: number;
@@ -26,7 +27,9 @@ export function StatsPage() {
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [sets, setSets] = useState<Set[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [rounds, setRounds] = useState<Round[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -41,16 +44,18 @@ export function StatsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [user, allTrainings, allSets, allExercises] = await Promise.all([
+      const [user, allTrainings, allSets, allExercises, allRounds] = await Promise.all([
         getUser(),
         getAllTrainings(),
         getAllSets(),
         getAllExercises(),
+        getAllRounds(),
       ]);
       if (user) {
         setUserName(user.name);
       }
       setExercises(allExercises);
+      setRounds(allRounds);
       filterDataWithAll(allTrainings, allSets);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -136,6 +141,93 @@ export function StatsPage() {
     })
     .sort((a, b) => b.count - a.count);
 
+  const copyToClipboard = async () => {
+    // Sort trainings by start time
+    const sortedTrainings = [...trainings].sort((a, b) => a.startTime - b.startTime);
+    
+    let markdown = `# Training Log Export\n\n`;
+    markdown += `**Date Range:** ${new Date(dateRange.start).toLocaleDateString()} - ${new Date(dateRange.end).toLocaleDateString()}\n\n`;
+    markdown += `**Total Trainings:** ${totalTrainings}\n\n`;
+    markdown += `---\n\n`;
+
+    sortedTrainings.forEach((training, index) => {
+      const duration = Math.round((training.endTime - training.startTime) / 1000 / 60);
+      const date = new Date(training.startTime);
+      
+      markdown += `## Training ${index + 1}: ${training.name || 'Workout'}\n\n`;
+      markdown += `**Date:** ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}\n\n`;
+      markdown += `**Duration:** ${duration} minutes\n\n`;
+      
+      if (training.warmUp) {
+        markdown += `**Warm-up:** ${training.warmUp}\n\n`;
+      }
+      
+      if (training.calmDown) {
+        markdown += `**Cool-down:** ${training.calmDown}\n\n`;
+      }
+
+      // Get sets for this training
+      const trainingSets = sets.filter(s => s.trainingId === training.id)
+        .sort((a, b) => a.orderInTraining - b.orderInTraining);
+
+      if (trainingSets.length > 0) {
+        markdown += `**Exercises:**\n\n`;
+        
+        trainingSets.forEach((set, setIndex) => {
+          const exercise = exercises.find(e => e.id === set.exerciseId);
+          const setRounds = rounds.filter(r => r.setId === set.id)
+            .sort((a, b) => a.orderInSet - b.orderInSet);
+          
+          markdown += `${setIndex + 1}. **${exercise?.name || 'Unknown Exercise'}**`;
+          if (exercise?.bodyPart) {
+            markdown += ` (${exercise.bodyPart})`;
+          }
+          markdown += `\n`;
+          
+          if (setRounds.length > 0) {
+            markdown += `   - Sets: ${setRounds.length}\n`;
+            markdown += `   - Rounds:\n`;
+            setRounds.forEach((round, roundIndex) => {
+              markdown += `     - Round ${roundIndex + 1}: ${round.reps} reps`;
+              if (round.weight > 0) {
+                markdown += ` @ ${round.weight}${exercise?.weightUnit || 'kg'}`;
+              }
+              if (round.notes) {
+                markdown += ` (${round.notes})`;
+              }
+              markdown += `\n`;
+            });
+          }
+          
+          if (set.restPeriod) {
+            markdown += `   - Rest: ${set.restPeriod}s\n`;
+          }
+          
+          if (set.notes) {
+            markdown += `   - Notes: ${set.notes}\n`;
+          }
+          
+          markdown += `\n`;
+        });
+      }
+
+      if (training.notes) {
+        markdown += `**Notes:** ${training.notes}\n\n`;
+      }
+
+      markdown += `---\n\n`;
+    });
+
+    // Copy to clipboard
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -195,6 +287,27 @@ export function StatsPage() {
             </Button>
             <Button size="sm" variant="outline" onClick={() => setPreset(365)}>
               Last year
+            </Button>
+          </div>
+          <div className="pt-2 border-t">
+            <Button 
+              size="sm" 
+              variant="default" 
+              onClick={copyToClipboard}
+              className="w-full"
+              disabled={totalTrainings === 0}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Training Log
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
