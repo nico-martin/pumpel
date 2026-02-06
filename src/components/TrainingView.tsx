@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { updateTraining, deleteTraining } from '@/db/trainings';
+import { updateTraining, deleteTraining, getAllWarmUps, getAllCoolDowns } from '@/db/trainings';
 import { getTrainingWithDetails, getLastUsedWeightForExercise } from '@/db/queries';
 import { createSet, deleteSet } from '@/db/sets';
 import { createRound, deleteRound } from '@/db/rounds';
@@ -8,9 +8,9 @@ import { getUser } from '@/db/user';
 import type { Exercise, TrainingWithDetails } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { ExerciseSelector } from '@/components/ExerciseSelector';
+import { TextareaWithSuggestions } from '@/components/TextareaWithSuggestions';
 import { Trash2, Edit, Check } from 'lucide-react';
 import { AddRound } from '@/components/trainingView/AddRound';
 import {
@@ -60,6 +60,8 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
   const [editEndDate, setEditEndDate] = useState('');
   const [editEndTime, setEditEndTime] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [warmUpSuggestions, setWarmUpSuggestions] = useState<string[]>([]);
+  const [coolDownSuggestions, setCoolDownSuggestions] = useState<string[]>([]);
 
   const loadUserName = useCallback(async () => {
     const user = await getUser();
@@ -78,10 +80,20 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     }
   }, [trainingId]);
 
+  const loadSuggestions = useCallback(async () => {
+    const [warmUps, coolDowns] = await Promise.all([
+      getAllWarmUps(),
+      getAllCoolDowns(),
+    ]);
+    setWarmUpSuggestions(warmUps);
+    setCoolDownSuggestions(coolDowns);
+  }, []);
+
   useEffect(() => {
     loadTraining();
     loadUserName();
-  }, [trainingId, loadTraining, loadUserName]);
+    loadSuggestions();
+  }, [trainingId, loadTraining, loadUserName, loadSuggestions]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -476,11 +488,12 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           </CardHeader>
           <CardContent>
             {isEditingWarmUp ? (
-              <Textarea
+              <TextareaWithSuggestions
                 placeholder="Describe your warm up routine..."
                 className="w-full"
                 value={editWarmUpValue}
-                onChange={(e) => setEditWarmUpValue(e.target.value)}
+                onChange={setEditWarmUpValue}
+                suggestions={warmUpSuggestions}
                 rows={3}
               />
             ) : (
@@ -613,11 +626,12 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
         </CardHeader>
         <CardContent>
           {isEditingCoolDown ? (
-            <Textarea
+            <TextareaWithSuggestions
               placeholder="Describe your cool down routine..."
               className="w-full"
               value={editCoolDownValue}
-              onChange={(e) => setEditCoolDownValue(e.target.value)}
+              onChange={setEditCoolDownValue}
+              suggestions={coolDownSuggestions}
               rows={3}
             />
           ) : (

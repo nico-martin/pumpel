@@ -89,3 +89,47 @@ export async function getActiveTraining(): Promise<Training | null> {
 
   return activeTraining || null;
 }
+
+// Get all unique warm up entries (non-empty, sorted by most recent usage)
+export async function getAllWarmUps(): Promise<string[]> {
+  const db = await getDB();
+  const trainings = await db.getAll('trainings');
+  
+  // Get unique warm ups with their most recent usage timestamp
+  const warmUpMap = new Map<string, number>();
+  trainings.forEach((training) => {
+    if (training.warmUp && training.warmUp.trim()) {
+      const existing = warmUpMap.get(training.warmUp);
+      if (!existing || training.startTime > existing) {
+        warmUpMap.set(training.warmUp, training.startTime);
+      }
+    }
+  });
+
+  // Sort by most recent usage
+  return Array.from(warmUpMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([warmUp]) => warmUp);
+}
+
+// Get all unique cool down entries (non-empty, sorted by most recent usage)
+export async function getAllCoolDowns(): Promise<string[]> {
+  const db = await getDB();
+  const trainings = await db.getAll('trainings');
+  
+  // Get unique cool downs with their most recent usage timestamp
+  const coolDownMap = new Map<string, number>();
+  trainings.forEach((training) => {
+    if (training.calmDown && training.calmDown.trim()) {
+      const existing = coolDownMap.get(training.calmDown);
+      if (!existing || training.startTime > existing) {
+        coolDownMap.set(training.calmDown, training.startTime);
+      }
+    }
+  });
+
+  // Sort by most recent usage
+  return Array.from(coolDownMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([coolDown]) => coolDown);
+}
