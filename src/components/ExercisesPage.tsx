@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllExercises, updateExercise, deleteExercise } from '@/db/exercises';
+import { getAllExercises, createExercise, updateExercise, deleteExercise } from '@/db/exercises';
 import { getSetsByExerciseId } from '@/db/sets';
 import { getUser } from '@/db/user';
 import type { Exercise } from '@/db/types';
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Trash2, Edit, ChevronLeft } from 'lucide-react';
+import { Trash2, Edit, ChevronLeft, Plus } from 'lucide-react';
 import { ExerciseForm } from '@/components/exercises/ExerciseForm';
 
 export function ExercisesPage() {
@@ -25,6 +25,7 @@ export function ExercisesPage() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editName, setEditName] = useState('');
   const [editBodyPart, setEditBodyPart] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -57,6 +58,15 @@ export function ExercisesPage() {
     }
   };
 
+  const handleCreateClick = () => {
+    setEditName('');
+    setEditBodyPart('');
+    setEditDescription('');
+    setEditWeightUnit('kg');
+    setEditSteps('1');
+    setShowCreateDialog(true);
+  };
+
   const handleEditClick = (exercise: Exercise) => {
     setEditingExercise(exercise);
     setEditName(exercise.name);
@@ -64,6 +74,30 @@ export function ExercisesPage() {
     setEditDescription(exercise.description || '');
     setEditWeightUnit(exercise.weightUnit || 'kg');
     setEditSteps(exercise.steps?.toString() || '1');
+  };
+
+  const handleCreateSave = async () => {
+    if (!editName.trim()) return;
+
+    const steps = parseFloat(editSteps);
+    if (isNaN(steps) || steps <= 0) {
+      alert('Steps must be a positive number');
+      return;
+    }
+
+    try {
+      await createExercise({
+        name: editName.trim(),
+        bodyPart: editBodyPart.trim() || undefined,
+        description: editDescription.trim() || undefined,
+        weightUnit: editWeightUnit,
+        steps: steps,
+      });
+      setShowCreateDialog(false);
+      await loadExercises();
+    } catch (error) {
+      console.error('Error creating exercise:', error);
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -138,9 +172,14 @@ export function ExercisesPage() {
       </div>
       <p className="text-muted-foreground mb-6 ml-12">{userName}'s exercise library</p>
 
+      <Button onClick={handleCreateClick} size="lg" className="w-full mb-6">
+        <Plus className="h-5 w-5 mr-2" />
+        Create New Exercise
+      </Button>
+
       {exercises.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">
-          No exercises yet, {userName}. Create one during a training session.
+          No exercises yet. Click the button above to create your first one!
         </p>
       ) : (
         <div className="space-y-3">
@@ -187,6 +226,36 @@ export function ExercisesPage() {
           ))}
         </div>
       )}
+
+      {/* Create Dialog */}
+      <AlertDialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create New Exercise</AlertDialogTitle>
+          </AlertDialogHeader>
+          <div className="mt-2">
+            <ExerciseForm
+              name={editName}
+              bodyPart={editBodyPart}
+              weightUnit={editWeightUnit}
+              steps={editSteps}
+              description={editDescription}
+              onNameChange={setEditName}
+              onBodyPartChange={setEditBodyPart}
+              onWeightUnitChange={setEditWeightUnit}
+              onStepsChange={setEditSteps}
+              onDescriptionChange={setEditDescription}
+              autoFocusName={true}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCreateSave}>
+              Create
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Edit Dialog */}
       <AlertDialog open={!!editingExercise} onOpenChange={() => setEditingExercise(null)}>
