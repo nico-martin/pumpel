@@ -24,11 +24,13 @@ interface ExerciseFormProps {
   bodyPart: string;
   weightUnit: 'kg' | 'lb';
   steps: string;
+  defaultWeight: string;
   description: string;
   onNameChange: (value: string) => void;
   onBodyPartChange: (value: string) => void;
   onWeightUnitChange: (value: 'kg' | 'lb') => void;
   onStepsChange: (value: string) => void;
+  onDefaultWeightChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   autoFocusName?: boolean;
 }
@@ -38,11 +40,13 @@ export function ExerciseForm({
   bodyPart,
   weightUnit,
   steps,
+  defaultWeight,
   description,
   onNameChange,
   onBodyPartChange,
   onWeightUnitChange,
   onStepsChange,
+  onDefaultWeightChange,
   onDescriptionChange,
   autoFocusName = false,
 }: ExerciseFormProps) {
@@ -105,6 +109,20 @@ export function ExerciseForm({
             step="0.1"
           />
         </div>
+      </div>
+      <div>
+        <label className="text-xs font-medium text-foreground block mb-1 text-left">
+          Start Weight
+        </label>
+        <Input
+          type="number"
+          inputMode="decimal"
+          placeholder="0"
+          value={defaultWeight}
+          onChange={(e) => onDefaultWeightChange(e.target.value)}
+          min="0"
+          step={steps || "1"}
+        />
       </div>
       <div>
         <label className="text-xs font-medium text-foreground block mb-1 text-left">

@@ -39,7 +39,7 @@ export interface WorkoutTrackerDB {
 }
 
 const DB_NAME = 'workoutTrackerDB';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 let dbInstance: IDBPDatabase<WorkoutTrackerDB> | null = null;
 
@@ -116,6 +116,20 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
           keyPath: 'id',
         });
         templatesStore.createIndex('name', 'name');
+      }
+
+      // Add defaultWeight to exercises (version 5)
+      if (oldVersion < 5) {
+        const exercisesStore = transaction.objectStore('exercises');
+        exercisesStore.openCursor().then(function updateExercise(cursor): Promise<void> | undefined {
+          if (!cursor) return;
+          const exercise = cursor.value as Exercise;
+          if (exercise.defaultWeight === undefined) {
+            exercise.defaultWeight = 0;
+          }
+          cursor.update(exercise);
+          return cursor.continue().then(updateExercise);
+        });
       }
     },
     blocked() {

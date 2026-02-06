@@ -129,10 +129,11 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           weight: data.weight.toString(),
         }));
       } else {
-        // No history for this exercise, clear weight
+        // No history for this exercise, use defaultWeight or clear
+        const defaultWeight = currentSet.exercise.defaultWeight;
         setCurrentRound((prev) => ({
           ...prev,
-          weight: '',
+          weight: defaultWeight && defaultWeight > 0 ? defaultWeight.toString() : '',
         }));
       }
     } catch (error) {

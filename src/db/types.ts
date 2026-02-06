@@ -8,6 +8,7 @@ export interface Exercise {
   bodyPart?: string; // e.g., "Chest", "Back", "Legs", etc.
   weightUnit: 'kg' | 'lb'; // Default: 'kg'
   steps: number; // Default: 1
+  defaultWeight?: number; // Default weight when adding new rounds
   createdAt: number; // Unix timestamp
 }
 
@@ -43,9 +44,10 @@ export interface Round {
 }
 
 // Input types (without generated fields)
-export type ExerciseInput = Omit<Exercise, 'id' | 'createdAt' | 'weightUnit' | 'steps'> & {
+export type ExerciseInput = Omit<Exercise, 'id' | 'createdAt' | 'weightUnit' | 'steps' | 'defaultWeight'> & {
   weightUnit?: 'kg' | 'lb';
   steps?: number;
+  defaultWeight?: number;
 };
 export type TrainingInput = Omit<Training, 'id' | 'createdAt'>;
 export type SetInput = Omit<Set, 'id' | 'createdAt'>;

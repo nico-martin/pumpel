@@ -28,6 +28,7 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
   const [newExerciseBodyPart, setNewExerciseBodyPart] = useState('');
   const [newExerciseWeightUnit, setNewExerciseWeightUnit] = useState<'kg' | 'lb'>('kg');
   const [newExerciseSteps, setNewExerciseSteps] = useState('1');
+  const [newExerciseDefaultWeight, setNewExerciseDefaultWeight] = useState('0');
 
   useEffect(() => {
     loadExercises();
@@ -52,6 +53,7 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
     setNewExerciseBodyPart('');
     setNewExerciseWeightUnit('kg');
     setNewExerciseSteps('1');
+    setNewExerciseDefaultWeight('0');
     setShowCreateForm(true);
   };
 
@@ -64,6 +66,12 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
       return;
     }
 
+    const defaultWeight = parseFloat(newExerciseDefaultWeight);
+    if (isNaN(defaultWeight) || defaultWeight < 0) {
+      alert('Default weight must be a non-negative number');
+      return;
+    }
+
     try {
       const newExercise = await createExercise({
         name: newExerciseName.trim(),
@@ -71,6 +79,7 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
         bodyPart: newExerciseBodyPart.trim() || undefined,
         weightUnit: newExerciseWeightUnit,
         steps: steps,
+        defaultWeight: defaultWeight,
       });
       setExercises((prev) => [...prev, newExercise]);
       onSelect(newExercise);
@@ -149,11 +158,13 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
               bodyPart={newExerciseBodyPart}
               weightUnit={newExerciseWeightUnit}
               steps={newExerciseSteps}
+              defaultWeight={newExerciseDefaultWeight}
               description={newExerciseDescription}
               onNameChange={setNewExerciseName}
               onBodyPartChange={setNewExerciseBodyPart}
               onWeightUnitChange={setNewExerciseWeightUnit}
               onStepsChange={setNewExerciseSteps}
+              onDefaultWeightChange={setNewExerciseDefaultWeight}
               onDescriptionChange={setNewExerciseDescription}
               autoFocusName={true}
             />

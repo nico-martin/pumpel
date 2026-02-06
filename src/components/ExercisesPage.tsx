@@ -31,6 +31,7 @@ export function ExercisesPage() {
   const [editDescription, setEditDescription] = useState('');
   const [editWeightUnit, setEditWeightUnit] = useState<'kg' | 'lb'>('kg');
   const [editSteps, setEditSteps] = useState('1');
+  const [editDefaultWeight, setEditDefaultWeight] = useState('0');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -64,6 +65,7 @@ export function ExercisesPage() {
     setEditDescription('');
     setEditWeightUnit('kg');
     setEditSteps('1');
+    setEditDefaultWeight('0');
     setShowCreateDialog(true);
   };
 
@@ -74,6 +76,7 @@ export function ExercisesPage() {
     setEditDescription(exercise.description || '');
     setEditWeightUnit(exercise.weightUnit || 'kg');
     setEditSteps(exercise.steps?.toString() || '1');
+    setEditDefaultWeight(exercise.defaultWeight?.toString() || '0');
   };
 
   const handleCreateSave = async () => {
@@ -85,6 +88,12 @@ export function ExercisesPage() {
       return;
     }
 
+    const defaultWeight = parseFloat(editDefaultWeight);
+    if (isNaN(defaultWeight) || defaultWeight < 0) {
+      alert('Default weight must be a non-negative number');
+      return;
+    }
+
     try {
       await createExercise({
         name: editName.trim(),
@@ -92,6 +101,7 @@ export function ExercisesPage() {
         description: editDescription.trim() || undefined,
         weightUnit: editWeightUnit,
         steps: steps,
+        defaultWeight: defaultWeight,
       });
       setShowCreateDialog(false);
       await loadExercises();
@@ -109,6 +119,12 @@ export function ExercisesPage() {
       return;
     }
 
+    const defaultWeight = parseFloat(editDefaultWeight);
+    if (isNaN(defaultWeight) || defaultWeight < 0) {
+      alert('Default weight must be a non-negative number');
+      return;
+    }
+
     try {
       await updateExercise(editingExercise.id, {
         name: editName.trim(),
@@ -116,6 +132,7 @@ export function ExercisesPage() {
         description: editDescription.trim() || undefined,
         weightUnit: editWeightUnit,
         steps: steps,
+        defaultWeight: defaultWeight,
       });
       setEditingExercise(null);
       await loadExercises();
@@ -239,11 +256,13 @@ export function ExercisesPage() {
               bodyPart={editBodyPart}
               weightUnit={editWeightUnit}
               steps={editSteps}
+              defaultWeight={editDefaultWeight}
               description={editDescription}
               onNameChange={setEditName}
               onBodyPartChange={setEditBodyPart}
               onWeightUnitChange={setEditWeightUnit}
               onStepsChange={setEditSteps}
+              onDefaultWeightChange={setEditDefaultWeight}
               onDescriptionChange={setEditDescription}
               autoFocusName={true}
             />
@@ -269,11 +288,13 @@ export function ExercisesPage() {
               bodyPart={editBodyPart}
               weightUnit={editWeightUnit}
               steps={editSteps}
+              defaultWeight={editDefaultWeight}
               description={editDescription}
               onNameChange={setEditName}
               onBodyPartChange={setEditBodyPart}
               onWeightUnitChange={setEditWeightUnit}
               onStepsChange={setEditSteps}
+              onDefaultWeightChange={setEditDefaultWeight}
               onDescriptionChange={setEditDescription}
               autoFocusName={true}
             />
