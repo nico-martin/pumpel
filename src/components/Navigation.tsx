@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { Menu, Home, Dumbbell, BarChart3, User } from 'lucide-react';
+import { Menu, Home, Dumbbell, BarChart3, User, ListChecks } from 'lucide-react';
 import packageJson from '../../package.json';
 
 export function Navigation() {
@@ -44,6 +44,13 @@ export function Navigation() {
             >
               <Dumbbell className="h-4 w-4" />
               Exercises
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => navigate('/templates')}
+              className={isActive('/templates') ? 'bg-accent' : ''}
+            >
+              <ListChecks className="h-4 w-4" />
+              Templates
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate('/stats')}

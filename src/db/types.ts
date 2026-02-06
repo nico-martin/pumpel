@@ -81,3 +81,16 @@ export interface User {
 
 // Input types for user
 export type UserInput = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+
+// Training Templates
+export interface TrainingTemplate {
+  id: string; // UUID
+  name: string;
+  description?: string;
+  exerciseIds: string[]; // Array of exercise IDs in order
+  createdAt: number; // Unix timestamp
+  updatedAt: number; // Unix timestamp
+}
+
+// Input type for training template
+export type TrainingTemplateInput = Omit<TrainingTemplate, 'id' | 'createdAt' | 'updatedAt'>;

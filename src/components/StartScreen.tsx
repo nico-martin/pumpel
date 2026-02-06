@@ -2,13 +2,15 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining } from '@/db/trainings';
 import { getTrainingWithDetails } from '@/db/queries';
-import { deleteSet } from '@/db/sets';
+import { deleteSet, createSet } from '@/db/sets';
 import { deleteRoundsBySetId } from '@/db/rounds';
 import { getUser } from '@/db/user';
-import type { Training, TrainingWithDetails } from '@/db/types';
+import { getAllTrainingTemplates } from '@/db/trainingTemplates';
+import { getAllExercises } from '@/db/exercises';
+import type { Training, TrainingWithDetails, TrainingTemplate, Exercise } from '@/db/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   setupTrainingNotifications,
   showTrainingNotification,
@@ -35,6 +44,9 @@ export function StartScreen() {
   const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<TrainingTemplate[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [showTemplateSelection, setShowTemplateSelection] = useState(false);
   const notificationIntervalRef = useRef<number | null>(null);
 
   // Setup notifications
@@ -57,10 +69,12 @@ export function StartScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [user, training, recent] = await Promise.all([
+      const [user, training, recent, loadedTemplates, loadedExercises] = await Promise.all([
         getUser(),
         getActiveTraining(),
         getTrainingsByStartTime(10),
+        getAllTrainingTemplates(),
+        getAllExercises(),
       ]);
 
       if (user) {
@@ -69,6 +83,8 @@ export function StartScreen() {
 
       setActiveTraining(training);
       setRecentTrainings(recent);
+      setTemplates(loadedTemplates);
+      setExercises(loadedExercises);
 
       // If there's an active training, start notifications
       if (training) {
@@ -127,6 +143,16 @@ export function StartScreen() {
       return;
     }
 
+    // Show template selection if templates exist
+    if (templates.length > 0) {
+      setShowTemplateSelection(true);
+    } else {
+      // No templates, start blank training
+      await startBlankTraining();
+    }
+  };
+
+  const startBlankTraining = async () => {
     try {
       const newTraining = await createTraining({
         startTime: Date.now(),
@@ -141,6 +167,36 @@ export function StartScreen() {
       navigate(`/training/${newTraining.id}`);
     } catch (error) {
       console.error('Error starting training:', error);
+    }
+  };
+
+  const startTrainingWithTemplate = async (template: TrainingTemplate) => {
+    try {
+      const newTraining = await createTraining({
+        name: template.name,
+        startTime: Date.now(),
+        endTime: 0, // Active training has endTime set to 0
+      });
+
+      // Create sets for each exercise in the template
+      for (let i = 0; i < template.exerciseIds.length; i++) {
+        await createSet({
+          trainingId: newTraining.id,
+          exerciseId: template.exerciseIds[i],
+          orderInTraining: i,
+        });
+      }
+
+      setActiveTraining(newTraining);
+      setShowTemplateSelection(false);
+
+      // Start showing notifications
+      startNotificationUpdates(newTraining.id, newTraining.startTime);
+
+      // Navigate to the new training
+      navigate(`/training/${newTraining.id}`);
+    } catch (error) {
+      console.error('Error starting training with template:', error);
     }
   };
 
@@ -338,6 +394,67 @@ export function StartScreen() {
           })}
         </div>
       )}
+
+      {/* Template Selection Dialog */}
+      <Dialog open={showTemplateSelection} onOpenChange={setShowTemplateSelection}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Start Training</DialogTitle>
+            <DialogDescription>
+              Choose a template or start a blank training
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                setShowTemplateSelection(false);
+                startBlankTraining();
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Start Blank Training
+            </Button>
+            {templates.map((template) => {
+              const getExerciseName = (exerciseId: string) => {
+                const exercise = exercises.find((e) => e.id === exerciseId);
+                return exercise?.name || 'Unknown';
+              };
+
+              return (
+                <Card
+                  key={template.id}
+                  size="sm"
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => startTrainingWithTemplate(template)}
+                >
+                  <CardHeader>
+                    <CardTitle>{template.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {template.description && (
+                      <p className="text-xs text-muted-foreground mb-2">{template.description}</p>
+                    )}
+                    {template.exerciseIds.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium">Exercises:</p>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          {template.exerciseIds.map((exerciseId, index) => (
+                            <li key={exerciseId}>
+                              {index + 1}. {getExerciseName(exerciseId)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>

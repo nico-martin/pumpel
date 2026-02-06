@@ -5,6 +5,7 @@ import { ExercisesPage } from '@/components/ExercisesPage';
 import { StatsPage } from '@/components/StatsPage';
 import { AccountPage } from '@/components/AccountPage';
 import { TrainingPage } from '@/pages/TrainingPage';
+import { TrainingTemplatesPage } from '@/components/TrainingTemplatesPage';
 import { Navigation } from '@/components/Navigation';
 import { NameSetupModal } from '@/components/NameSetupModal';
 import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt';
@@ -58,6 +59,7 @@ export function App() {
           <Route path="/" element={<StartScreen />} />
           <Route path="/training/:id" element={<TrainingPage />} />
           <Route path="/exercises" element={<ExercisesPage />} />
+          <Route path="/templates" element={<TrainingTemplatesPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

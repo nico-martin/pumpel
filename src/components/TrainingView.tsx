@@ -360,8 +360,6 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     );
   }
 
-  const currentSet = training.sets.find((s) => s.id === currentSetId);
-
   return (
     <div className="min-h-screen p-4 pb-24">
       {onBack && (
@@ -525,9 +523,9 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                   </div>
                 </CardTitle>
               </CardHeader>
-              {set.rounds.length > 0 && (
-                <CardContent>
-                  <div className="space-y-1">
+              <CardContent>
+                {set.rounds.length > 0 && (
+                  <div className="space-y-1 mb-3">
                     {set.rounds.map((round, roundIdx) => (
                       <div key={round.id} className="flex gap-2 text-xs items-center">
                         <span className="text-muted-foreground w-8">
@@ -552,8 +550,26 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              )}
+                )}
+                
+                {/* Add Round Section - shown when this set is active */}
+                {currentSetId === set.id && (
+                  <AddRound
+                    exerciseName={set.exercise.name}
+                    exerciseId={set.exerciseId}
+                    trainingId={trainingId}
+                    weightUnit={set.exercise.weightUnit}
+                    steps={set.exercise.steps}
+                    currentRound={currentRound}
+                    onRoundChange={(field, value) =>
+                      setCurrentRound((prev) => ({ ...prev, [field]: value }))
+                    }
+                    onAddRound={handleAddRound}
+                    onStartNewSet={handleStartNewSet}
+                    inline={true}
+                  />
+                )}
+              </CardContent>
             </Card>
           ))}
       </div>
@@ -575,21 +591,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
             </Button>
           </CardContent>
         </Card>
-      ) : currentSetId ? (
-        <AddRound
-          exerciseName={currentSet?.exercise.name || ''}
-          exerciseId={currentSet?.exerciseId || ''}
-          trainingId={trainingId}
-          weightUnit={currentSet?.exercise.weightUnit || 'kg'}
-          steps={currentSet?.exercise.steps || 1}
-          currentRound={currentRound}
-          onRoundChange={(field, value) =>
-            setCurrentRound((prev) => ({ ...prev, [field]: value }))
-          }
-          onAddRound={handleAddRound}
-          onStartNewSet={handleStartNewSet}
-        />
-      ) : (
+      ) : !currentSetId && (
         <Button className="w-full" onClick={handleStartNewSet}>
           Start New Set
         </Button>

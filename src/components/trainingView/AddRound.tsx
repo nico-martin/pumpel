@@ -38,6 +38,7 @@ interface AddRoundProps {
   onRoundChange: (field: keyof CurrentRound, value: string) => void;
   onAddRound: () => void;
   onStartNewSet: () => void;
+  inline?: boolean;
 }
 
 export function AddRound({
@@ -50,6 +51,7 @@ export function AddRound({
   onRoundChange,
   onAddRound,
   onStartNewSet,
+  inline = false,
 }: AddRoundProps) {
   const [showLastUsed, setShowLastUsed] = useState(false);
   const [lastSetData, setLastSetData] = useState<LastSetData | null>(null);
@@ -96,6 +98,162 @@ export function AddRound({
     onRoundChange('reps', newReps.toString());
   };
 
+  const content = (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">
+            Weight ({weightUnit})
+          </label>
+          <div className="flex">
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={handleDecrementWeight}
+              className="rounded-r-none border-r-0"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              inputMode="decimal"
+              placeholder="0"
+              value={currentRound.weight}
+              onChange={(e) => onRoundChange('weight', e.target.value)}
+              className="text-center rounded-none border-x-0 focus-visible:z-10"
+            />
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={handleIncrementWeight}
+              className="rounded-l-none border-l-0"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">
+            Reps
+          </label>
+          <div className="flex">
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={handleDecrementReps}
+              className="rounded-r-none border-r-0"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              inputMode="numeric"
+              placeholder="0"
+              value={currentRound.reps}
+              onChange={(e) => onRoundChange('reps', e.target.value)}
+              className="text-center rounded-none border-x-0 focus-visible:z-10"
+            />
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={handleIncrementReps}
+              className="rounded-l-none border-l-0"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label className="text-xs text-muted-foreground mb-1 block">
+          Notes (optional)
+        </label>
+        <Textarea
+          placeholder="How did it feel?"
+          value={currentRound.notes}
+          onChange={(e) => onRoundChange('notes', e.target.value)}
+          rows={2}
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button
+          className="flex-1"
+          onClick={onAddRound}
+          disabled={!currentRound.weight || !currentRound.reps}
+        >
+          Add Round
+        </Button>
+        <Button variant="outline" onClick={onStartNewSet}>
+          New Set
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Inline mode - no card wrapper, just content with a small title
+  if (inline) {
+    return (
+      <div className="pt-3 border-t">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium">Add Round</h4>
+          <AlertDialog open={showLastUsed} onOpenChange={setShowLastUsed}>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                onClick={handleShowLastUsed}
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Last Set</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {lastSetData ? (
+                    <div className="space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(lastSetData.date)}
+                      </p>
+                      <div className="space-y-1">
+                        {lastSetData.rounds.map((round, index) => (
+                          <div key={round.id} className="flex gap-2 text-sm">
+                            <span className="text-muted-foreground w-8">
+                              #{index + 1}
+                            </span>
+                            <span className="font-medium">{round.weight}{weightUnit}</span>
+                            <span className="text-muted-foreground">×</span>
+                            <span className="font-medium">{round.reps} reps</span>
+                            {round.notes && (
+                              <span className="text-muted-foreground ml-2">
+                                {round.notes}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p>No previous data found for this exercise.</p>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction>Close</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+        {content}
+      </div>
+    );
+  }
+
+  // Standalone mode - full card with title
   return (
     <Card>
       <CardHeader>
@@ -151,99 +309,7 @@ export function AddRound({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">
-                Weight ({weightUnit})
-              </label>
-              <div className="flex">
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  onClick={handleDecrementWeight}
-                  className="rounded-r-none border-r-0"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0"
-                  value={currentRound.weight}
-                  onChange={(e) => onRoundChange('weight', e.target.value)}
-                  className="text-center rounded-none border-x-0 focus-visible:z-10"
-                />
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  onClick={handleIncrementWeight}
-                  className="rounded-l-none border-l-0"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">
-                Reps
-              </label>
-              <div className="flex">
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  onClick={handleDecrementReps}
-                  className="rounded-r-none border-r-0"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="0"
-                  value={currentRound.reps}
-                  onChange={(e) => onRoundChange('reps', e.target.value)}
-                  className="text-center rounded-none border-x-0 focus-visible:z-10"
-                />
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  onClick={handleIncrementReps}
-                  className="rounded-l-none border-l-0"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">
-              Notes (optional)
-            </label>
-            <Textarea
-              placeholder="How did it feel?"
-              value={currentRound.notes}
-              onChange={(e) => onRoundChange('notes', e.target.value)}
-              rows={2}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              className="flex-1"
-              onClick={onAddRound}
-              disabled={!currentRound.weight || !currentRound.reps}
-            >
-              Add Round
-            </Button>
-            <Button variant="outline" onClick={onStartNewSet}>
-              New Set
-            </Button>
-          </div>
-        </div>
+        {content}
       </CardContent>
     </Card>
   );

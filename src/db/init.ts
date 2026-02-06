@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Exercise, Training, Set, Round, User } from './types';
+import type { Exercise, Training, Set, Round, User, TrainingTemplate } from './types';
 
 // Define the database schema
 export interface WorkoutTrackerDB {
@@ -31,10 +31,15 @@ export interface WorkoutTrackerDB {
     key: string;
     value: User;
   };
+  trainingTemplates: {
+    key: string;
+    value: TrainingTemplate;
+    indexes: { name: string };
+  };
 }
 
 const DB_NAME = 'workoutTrackerDB';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbInstance: IDBPDatabase<WorkoutTrackerDB> | null = null;
 
@@ -103,6 +108,14 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
           cursor.update(exercise);
           return cursor.continue().then(updateExercise);
         });
+      }
+
+      // Create training templates store (version 4)
+      if (!db.objectStoreNames.contains('trainingTemplates')) {
+        const templatesStore = db.createObjectStore('trainingTemplates', {
+          keyPath: 'id',
+        });
+        templatesStore.createIndex('name', 'name');
       }
     },
     blocked() {
