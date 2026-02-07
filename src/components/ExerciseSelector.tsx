@@ -43,7 +43,10 @@ export function ExerciseSelector({
 
   const loadExercises = async () => {
     const allExercises = await getAllExercises();
-    setExercises(allExercises);
+    const sortedExercises = allExercises.sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    setExercises(sortedExercises);
   };
 
   const filteredExercises = searchValue
@@ -90,7 +93,9 @@ export function ExerciseSelector({
         steps: steps,
         defaultWeight: defaultWeight,
       });
-      setExercises((prev) => [...prev, newExercise]);
+      setExercises((prev) =>
+        [...prev, newExercise].sort((a, b) => a.name.localeCompare(b.name)),
+      );
       onSelect(newExercise);
       setSearchValue("");
       setShowCreateForm(false);

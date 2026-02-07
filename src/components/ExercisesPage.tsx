@@ -59,7 +59,10 @@ export function ExercisesPage() {
     try {
       setLoading(true);
       const allExercises = await getAllExercises();
-      setExercises(allExercises);
+      const sortedExercises = allExercises.sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      setExercises(sortedExercises);
     } catch (error) {
       console.error("Error loading exercises:", error);
     } finally {
