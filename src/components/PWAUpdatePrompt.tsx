@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 export function PWAUpdatePrompt() {
   // Unregister any existing service workers in dev mode
   useEffect(() => {
-    if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+    if (import.meta.env.DEV && "serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
           registration.unregister().then(() => {
-            console.log('Service Worker unregistered in dev mode');
+            console.log("Service Worker unregistered in dev mode");
           });
         }
       });

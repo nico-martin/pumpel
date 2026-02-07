@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Info, Plus, Minus } from 'lucide-react';
-import { getLastSetForExercise } from '@/db/queries';
-import type { Round } from '@/db/types';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Info, Plus, Minus } from "lucide-react";
+import { getLastSetForExercise } from "@/db/queries";
+import type { Round } from "@/db/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface CurrentRound {
   weight: string;
@@ -32,7 +32,7 @@ interface AddRoundProps {
   exerciseName: string;
   exerciseId: string;
   trainingId: string;
-  weightUnit: 'kg' | 'lb';
+  weightUnit: "kg" | "lb";
   steps: number;
   currentRound: CurrentRound;
   onRoundChange: (field: keyof CurrentRound, value: string) => void;
@@ -58,8 +58,8 @@ export function AddRound({
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
@@ -70,32 +70,32 @@ export function AddRound({
       setLastSetData(data);
       setShowLastUsed(true);
     } catch (error) {
-      console.error('Error fetching last set data:', error);
+      console.error("Error fetching last set data:", error);
     }
   };
 
   const handleIncrementWeight = () => {
     const currentWeight = parseFloat(currentRound.weight) || 0;
     const newWeight = currentWeight + steps;
-    onRoundChange('weight', newWeight.toString());
+    onRoundChange("weight", newWeight.toString());
   };
 
   const handleDecrementWeight = () => {
     const currentWeight = parseFloat(currentRound.weight) || 0;
     const newWeight = Math.max(0, currentWeight - steps);
-    onRoundChange('weight', newWeight.toString());
+    onRoundChange("weight", newWeight.toString());
   };
 
   const handleIncrementReps = () => {
     const currentReps = parseInt(currentRound.reps) || 0;
     const newReps = currentReps + 1;
-    onRoundChange('reps', newReps.toString());
+    onRoundChange("reps", newReps.toString());
   };
 
   const handleDecrementReps = () => {
     const currentReps = parseInt(currentRound.reps) || 0;
     const newReps = Math.max(0, currentReps - 1);
-    onRoundChange('reps', newReps.toString());
+    onRoundChange("reps", newReps.toString());
   };
 
   const content = (
@@ -120,7 +120,7 @@ export function AddRound({
               inputMode="decimal"
               placeholder="0"
               value={currentRound.weight}
-              onChange={(e) => onRoundChange('weight', e.target.value)}
+              onChange={(e) => onRoundChange("weight", e.target.value)}
               className="text-center rounded-none border-x-0 focus-visible:z-10"
             />
             <Button
@@ -153,7 +153,7 @@ export function AddRound({
               inputMode="numeric"
               placeholder="0"
               value={currentRound.reps}
-              onChange={(e) => onRoundChange('reps', e.target.value)}
+              onChange={(e) => onRoundChange("reps", e.target.value)}
               className="text-center rounded-none border-x-0 focus-visible:z-10"
             />
             <Button
@@ -175,7 +175,7 @@ export function AddRound({
         <Textarea
           placeholder="How did it feel?"
           value={currentRound.notes}
-          onChange={(e) => onRoundChange('notes', e.target.value)}
+          onChange={(e) => onRoundChange("notes", e.target.value)}
           rows={2}
         />
       </div>
@@ -225,9 +225,14 @@ export function AddRound({
                             <span className="text-muted-foreground w-8">
                               #{index + 1}
                             </span>
-                            <span className="font-medium">{round.weight}{weightUnit}</span>
+                            <span className="font-medium">
+                              {round.weight}
+                              {weightUnit}
+                            </span>
                             <span className="text-muted-foreground">×</span>
-                            <span className="font-medium">{round.reps} reps</span>
+                            <span className="font-medium">
+                              {round.reps} reps
+                            </span>
                             {round.notes && (
                               <span className="text-muted-foreground ml-2">
                                 {round.notes}
@@ -284,9 +289,14 @@ export function AddRound({
                             <span className="text-muted-foreground w-8">
                               #{index + 1}
                             </span>
-                            <span className="font-medium">{round.weight}{weightUnit}</span>
+                            <span className="font-medium">
+                              {round.weight}
+                              {weightUnit}
+                            </span>
                             <span className="text-muted-foreground">×</span>
-                            <span className="font-medium">{round.reps} reps</span>
+                            <span className="font-medium">
+                              {round.reps} reps
+                            </span>
                             {round.notes && (
                               <span className="text-muted-foreground ml-2">
                                 {round.notes}
@@ -308,9 +318,7 @@ export function AddRound({
           </AlertDialog>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        {content}
-      </CardContent>
+      <CardContent>{content}</CardContent>
     </Card>
   );
 }

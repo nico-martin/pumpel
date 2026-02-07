@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getAllTrainingTemplates,
   createTrainingTemplate,
   updateTrainingTemplate,
   deleteTrainingTemplate,
-} from '@/db/trainingTemplates';
-import { getAllExercises } from '@/db/exercises';
-import type { TrainingTemplate, Exercise } from '@/db/types';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ChevronLeft, Plus, Trash2, Edit, GripVertical, X } from 'lucide-react';
+} from "@/db/trainingTemplates";
+import { getAllExercises } from "@/db/exercises";
+import type { TrainingTemplate, Exercise } from "@/db/types";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ChevronLeft, Plus, Trash2, Edit, GripVertical, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -29,9 +29,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export function TrainingTemplatesPage() {
   const navigate = useNavigate();
@@ -40,9 +40,14 @@ export function TrainingTemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<TrainingTemplate | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '', exerciseIds: [] as string[] });
-  const [searchValue, setSearchValue] = useState('');
+  const [editingTemplate, setEditingTemplate] =
+    useState<TrainingTemplate | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    exerciseIds: [] as string[],
+  });
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     loadData();
@@ -58,7 +63,7 @@ export function TrainingTemplatesPage() {
       setTemplates(loadedTemplates);
       setExercises(loadedExercises);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
@@ -66,8 +71,8 @@ export function TrainingTemplatesPage() {
 
   const handleCreateNew = () => {
     setEditingTemplate(null);
-    setFormData({ name: '', description: '', exerciseIds: [] });
-    setSearchValue('');
+    setFormData({ name: "", description: "", exerciseIds: [] });
+    setSearchValue("");
     setEditDialogOpen(true);
   };
 
@@ -75,10 +80,10 @@ export function TrainingTemplatesPage() {
     setEditingTemplate(template);
     setFormData({
       name: template.name,
-      description: template.description || '',
+      description: template.description || "",
       exerciseIds: template.exerciseIds,
     });
-    setSearchValue('');
+    setSearchValue("");
     setEditDialogOpen(true);
   };
 
@@ -99,11 +104,11 @@ export function TrainingTemplatesPage() {
           exerciseIds: formData.exerciseIds,
         });
       }
-      
+
       setEditDialogOpen(false);
       await loadData();
     } catch (error) {
-      console.error('Error saving template:', error);
+      console.error("Error saving template:", error);
     }
   };
 
@@ -115,7 +120,7 @@ export function TrainingTemplatesPage() {
       setDeleteConfirmId(null);
       await loadData();
     } catch (error) {
-      console.error('Error deleting template:', error);
+      console.error("Error deleting template:", error);
     }
   };
 
@@ -126,7 +131,7 @@ export function TrainingTemplatesPage() {
         exerciseIds: [...formData.exerciseIds, exerciseId],
       });
     }
-    setSearchValue('');
+    setSearchValue("");
   };
 
   const removeExercise = (index: number) => {
@@ -138,14 +143,17 @@ export function TrainingTemplatesPage() {
     });
   };
 
-  const moveExercise = (index: number, direction: 'up' | 'down') => {
+  const moveExercise = (index: number, direction: "up" | "down") => {
     const newExerciseIds = [...formData.exerciseIds];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+
     if (targetIndex < 0 || targetIndex >= newExerciseIds.length) return;
-    
-    [newExerciseIds[index], newExerciseIds[targetIndex]] = [newExerciseIds[targetIndex], newExerciseIds[index]];
-    
+
+    [newExerciseIds[index], newExerciseIds[targetIndex]] = [
+      newExerciseIds[targetIndex],
+      newExerciseIds[index],
+    ];
+
     setFormData({
       ...formData,
       exerciseIds: newExerciseIds,
@@ -154,7 +162,7 @@ export function TrainingTemplatesPage() {
 
   const getExerciseName = (exerciseId: string) => {
     const exercise = exercises.find((e) => e.id === exerciseId);
-    return exercise?.name || 'Unknown Exercise';
+    return exercise?.name || "Unknown Exercise";
   };
 
   if (loading) {
@@ -171,14 +179,16 @@ export function TrainingTemplatesPage() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="shrink-0"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-bold">Training Templates</h1>
       </div>
-      <p className="text-muted-foreground mb-6 ml-12">Predefined training routines</p>
+      <p className="text-muted-foreground mb-6 ml-12">
+        Predefined training routines
+      </p>
 
       <Button onClick={handleCreateNew} size="lg" className="w-full mb-6">
         <Plus className="h-5 w-5 mr-2" />
@@ -188,7 +198,9 @@ export function TrainingTemplatesPage() {
       {templates.length === 0 ? (
         <Card size="sm">
           <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground">No templates yet. Create your first one!</p>
+            <p className="text-muted-foreground">
+              No templates yet. Create your first one!
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -218,7 +230,9 @@ export function TrainingTemplatesPage() {
               </CardHeader>
               <CardContent>
                 {template.description && (
-                  <p className="text-xs text-muted-foreground mb-2">{template.description}</p>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {template.description}
+                  </p>
                 )}
                 {template.exerciseIds.length > 0 ? (
                   <div className="space-y-1">
@@ -232,7 +246,9 @@ export function TrainingTemplatesPage() {
                     </ul>
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">No exercises added yet</p>
+                  <p className="text-xs text-muted-foreground">
+                    No exercises added yet
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -245,12 +261,12 @@ export function TrainingTemplatesPage() {
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingTemplate ? 'Edit Template' : 'Create Template'}
+              {editingTemplate ? "Edit Template" : "Create Template"}
             </DialogTitle>
             <DialogDescription>
               {editingTemplate
-                ? 'Update your training template details.'
-                : 'Create a new training template with exercises.'}
+                ? "Update your training template details."
+                : "Create a new training template with exercises."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -259,7 +275,9 @@ export function TrainingTemplatesPage() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="e.g., Upper Body Day"
               />
             </div>
@@ -268,7 +286,9 @@ export function TrainingTemplatesPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Brief description of this training..."
                 rows={2}
               />
@@ -291,9 +311,12 @@ export function TrainingTemplatesPage() {
                     {searchValue && (
                       <div className="max-h-48 overflow-y-auto border rounded-md">
                         {exercises
-                          .filter((ex) => 
-                            ex.name.toLowerCase().includes(searchValue.toLowerCase()) &&
-                            !formData.exerciseIds.includes(ex.id)
+                          .filter(
+                            (ex) =>
+                              ex.name
+                                .toLowerCase()
+                                .includes(searchValue.toLowerCase()) &&
+                              !formData.exerciseIds.includes(ex.id),
                           )
                           .map((exercise) => (
                             <Button
@@ -319,11 +342,15 @@ export function TrainingTemplatesPage() {
                   {/* Selected exercises list with reordering */}
                   {formData.exerciseIds.length > 0 && (
                     <div className="border rounded-md p-2 space-y-1">
-                      <p className="text-xs font-medium mb-2">Selected ({formData.exerciseIds.length}):</p>
+                      <p className="text-xs font-medium mb-2">
+                        Selected ({formData.exerciseIds.length}):
+                      </p>
                       {formData.exerciseIds.map((exerciseId, index) => {
-                        const exercise = exercises.find((e) => e.id === exerciseId);
+                        const exercise = exercises.find(
+                          (e) => e.id === exerciseId,
+                        );
                         if (!exercise) return null;
-                        
+
                         return (
                           <div
                             key={exerciseId}
@@ -333,7 +360,7 @@ export function TrainingTemplatesPage() {
                               <Button
                                 size="icon-xs"
                                 variant="ghost"
-                                onClick={() => moveExercise(index, 'up')}
+                                onClick={() => moveExercise(index, "up")}
                                 disabled={index === 0}
                                 className="h-4 w-4 p-0"
                               >
@@ -342,18 +369,26 @@ export function TrainingTemplatesPage() {
                               <Button
                                 size="icon-xs"
                                 variant="ghost"
-                                onClick={() => moveExercise(index, 'down')}
-                                disabled={index === formData.exerciseIds.length - 1}
+                                onClick={() => moveExercise(index, "down")}
+                                disabled={
+                                  index === formData.exerciseIds.length - 1
+                                }
                                 className="h-4 w-4 p-0"
                               >
                                 <GripVertical className="h-3 w-3" />
                               </Button>
                             </div>
-                            <span className="text-sm font-medium mr-2">{index + 1}.</span>
+                            <span className="text-sm font-medium mr-2">
+                              {index + 1}.
+                            </span>
                             <div className="flex-1">
-                              <p className="text-sm font-medium">{exercise.name}</p>
+                              <p className="text-sm font-medium">
+                                {exercise.name}
+                              </p>
                               {exercise.bodyPart && (
-                                <p className="text-xs text-muted-foreground">{exercise.bodyPart}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {exercise.bodyPart}
+                                </p>
                               )}
                             </div>
                             <Button
@@ -377,19 +412,23 @@ export function TrainingTemplatesPage() {
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={!formData.name.trim()}>
-              {editingTemplate ? 'Update' : 'Create'}
+              {editingTemplate ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+      <AlertDialog
+        open={!!deleteConfirmId}
+        onOpenChange={() => setDeleteConfirmId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Template</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this training template? This action cannot be undone.
+              Are you sure you want to delete this training template? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

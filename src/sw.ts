@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { clientsClaim } from 'workbox-core';
+import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
+import { clientsClaim } from "workbox-core";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -13,7 +13,7 @@ self.skipWaiting();
 clientsClaim();
 
 // Handle notification clicks
-self.addEventListener('notificationclick', (event: NotificationEvent) => {
+self.addEventListener("notificationclick", (event: NotificationEvent) => {
   event.notification.close();
 
   // Extract training ID from notification data
@@ -24,18 +24,18 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
   // Use query parameter instead of hash since HashRouter already uses #
   const urlWithHash = trainingId
     ? `/#/training/${trainingId}?from=notification`
-    : '/#?from=notification';
+    : "/#?from=notification";
 
   // Open or focus the app
   event.waitUntil(
     self.clients
-      .matchAll({ type: 'window', includeUncontrolled: true })
+      .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
         // Try to find an already open window
         for (const client of clientList) {
-          if ('focus' in client) {
+          if ("focus" in client) {
             // Navigate to URL with hash to signal notification click
-            if ('navigate' in client) {
+            if ("navigate" in client) {
               client.navigate(urlWithHash);
             }
             return client.focus();
@@ -45,13 +45,13 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
         if (self.clients.openWindow) {
           return self.clients.openWindow(urlWithHash);
         }
-      })
+      }),
   );
 });
 
 // Listen for messages from the app
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });

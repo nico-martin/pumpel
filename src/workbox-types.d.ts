@@ -1,10 +1,10 @@
 // Type definitions for Workbox
-declare module 'workbox-precaching' {
+declare module "workbox-precaching" {
   export function precacheAndRoute(entries: any[]): void;
   export function cleanupOutdatedCaches(): void;
 }
 
-declare module 'workbox-core' {
+declare module "workbox-core" {
   export function clientsClaim(): void;
 }
 

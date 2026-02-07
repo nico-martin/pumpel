@@ -1,16 +1,26 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getActiveTraining, createTraining, getTrainingsByStartTime, deleteTraining } from '@/db/trainings';
-import { getTrainingWithDetails } from '@/db/queries';
-import { deleteSet, createSet } from '@/db/sets';
-import { deleteRoundsBySetId } from '@/db/rounds';
-import { getUser } from '@/db/user';
-import { getAllTrainingTemplates } from '@/db/trainingTemplates';
-import { getAllExercises } from '@/db/exercises';
-import type { Training, TrainingWithDetails, TrainingTemplate, Exercise } from '@/db/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Trash2, Plus } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getActiveTraining,
+  createTraining,
+  getTrainingsByStartTime,
+  deleteTraining,
+} from "@/db/trainings";
+import { getTrainingWithDetails } from "@/db/queries";
+import { deleteSet, createSet } from "@/db/sets";
+import { deleteRoundsBySetId } from "@/db/rounds";
+import { getUser } from "@/db/user";
+import { getAllTrainingTemplates } from "@/db/trainingTemplates";
+import { getAllExercises } from "@/db/exercises";
+import type {
+  Training,
+  TrainingWithDetails,
+  TrainingTemplate,
+  Exercise,
+} from "@/db/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Trash2, Plus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,28 +30,32 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   setupTrainingNotifications,
   showTrainingNotification,
   closeTrainingNotifications,
-  hasNotificationPermission
-} from '@/services/trainingNotifications';
+  hasNotificationPermission,
+} from "@/services/trainingNotifications";
 
 export function StartScreen() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState<string>('');
+  const [userName, setUserName] = useState<string>("");
   const [activeTraining, setActiveTraining] = useState<Training | null>(null);
   const [recentTrainings, setRecentTrainings] = useState<Training[]>([]);
-  const [trainingDetails, setTrainingDetails] = useState<Map<string, TrainingWithDetails>>(new Map());
-  const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(new Set());
+  const [trainingDetails, setTrainingDetails] = useState<
+    Map<string, TrainingWithDetails>
+  >(new Map());
+  const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(
+    new Set(),
+  );
   const [loading, setLoading] = useState(true);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [templates, setTemplates] = useState<TrainingTemplate[]>([]);
@@ -65,17 +79,17 @@ export function StartScreen() {
     };
   }, []);
 
-
   const loadData = async () => {
     try {
       setLoading(true);
-      const [user, training, recent, loadedTemplates, loadedExercises] = await Promise.all([
-        getUser(),
-        getActiveTraining(),
-        getTrainingsByStartTime(10),
-        getAllTrainingTemplates(),
-        getAllExercises(),
-      ]);
+      const [user, training, recent, loadedTemplates, loadedExercises] =
+        await Promise.all([
+          getUser(),
+          getActiveTraining(),
+          getTrainingsByStartTime(10),
+          getAllTrainingTemplates(),
+          getAllExercises(),
+        ]);
 
       if (user) {
         setUserName(user.name);
@@ -101,32 +115,35 @@ export function StartScreen() {
       }
       setTrainingDetails(detailsMap);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   // Start notification updates for active training
-  const startNotificationUpdates = useCallback((trainingId: string, startTime: number) => {
-    // Clear any existing interval
-    if (notificationIntervalRef.current) {
-      clearInterval(notificationIntervalRef.current);
-    }
-
-    // Show initial notification
-    const showNotification = () => {
-      if (hasNotificationPermission()) {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000 / 60);
-        showTrainingNotification(trainingId, startTime, elapsed);
+  const startNotificationUpdates = useCallback(
+    (trainingId: string, startTime: number) => {
+      // Clear any existing interval
+      if (notificationIntervalRef.current) {
+        clearInterval(notificationIntervalRef.current);
       }
-    };
 
-    showNotification();
+      // Show initial notification
+      const showNotification = () => {
+        if (hasNotificationPermission()) {
+          const elapsed = Math.floor((Date.now() - startTime) / 1000 / 60);
+          showTrainingNotification(trainingId, startTime, elapsed);
+        }
+      };
 
-    // Update notification every minute
-    notificationIntervalRef.current = setInterval(showNotification, 60000);
-  }, []);
+      showNotification();
+
+      // Update notification every minute
+      notificationIntervalRef.current = setInterval(showNotification, 60000);
+    },
+    [],
+  );
 
   // Stop notification updates and close notifications
   const stopNotificationUpdates = useCallback(() => {
@@ -166,7 +183,7 @@ export function StartScreen() {
       // Navigate to the new training
       navigate(`/training/${newTraining.id}`);
     } catch (error) {
-      console.error('Error starting training:', error);
+      console.error("Error starting training:", error);
     }
   };
 
@@ -196,10 +213,9 @@ export function StartScreen() {
       // Navigate to the new training
       navigate(`/training/${newTraining.id}`);
     } catch (error) {
-      console.error('Error starting training with template:', error);
+      console.error("Error starting training with template:", error);
     }
   };
-
 
   const toggleExpanded = (trainingId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -246,14 +262,14 @@ export function StartScreen() {
       setDeleteConfirmId(null);
       await loadData();
     } catch (error) {
-      console.error('Error deleting training:', error);
+      console.error("Error deleting training:", error);
     }
   };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
@@ -297,13 +313,13 @@ export function StartScreen() {
       {recentTrainings.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-medium">
-            {activeTraining ? 'Current & Recent Trainings' : 'Recent Trainings'}
+            {activeTraining ? "Current & Recent Trainings" : "Recent Trainings"}
           </h2>
           {recentTrainings.map((training) => {
             const date = formatDate(training.startTime);
             const isActive = training.endTime === 0;
             const duration = isActive
-              ? 'In progress'
+              ? "In progress"
               : formatDuration(training.startTime, training.endTime);
 
             const handleClick = () => {
@@ -356,21 +372,35 @@ export function StartScreen() {
                 {(training.name || hasExercises) && (
                   <CardContent>
                     {training.name && (
-                      <p className="text-xs text-muted-foreground mb-2">{training.name}</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {training.name}
+                      </p>
                     )}
                     {hasExercises && (
                       <div className="space-y-2">
                         {visibleSets.map((set) => {
-                          const maxWeight = set.rounds.length > 0
-                            ? Math.max(...set.rounds.map(r => r.weight)).toFixed(1)
-                            : '0';
-                          const totalReps = set.rounds.reduce((sum, r) => sum + r.reps, 0);
+                          const maxWeight =
+                            set.rounds.length > 0
+                              ? Math.max(
+                                  ...set.rounds.map((r) => r.weight),
+                                ).toFixed(1)
+                              : "0";
+                          const totalReps = set.rounds.reduce(
+                            (sum, r) => sum + r.reps,
+                            0,
+                          );
 
                           return (
-                            <div key={set.id} className="text-xs flex items-center justify-between">
-                              <span className="font-medium">{set.exercise.name}</span>
+                            <div
+                              key={set.id}
+                              className="text-xs flex items-center justify-between"
+                            >
+                              <span className="font-medium">
+                                {set.exercise.name}
+                              </span>
                               <span className="text-muted-foreground">
-                                {set.rounds.length} × {maxWeight}kg × {totalReps} reps
+                                {set.rounds.length} × {maxWeight}kg ×{" "}
+                                {totalReps} reps
                               </span>
                             </div>
                           );
@@ -382,7 +412,9 @@ export function StartScreen() {
                             className="w-full"
                             onClick={(e) => toggleExpanded(training.id, e)}
                           >
-                            {isExpanded ? 'Show less' : `Show ${details.sets.length - 3} more`}
+                            {isExpanded
+                              ? "Show less"
+                              : `Show ${details.sets.length - 3} more`}
                           </Button>
                         )}
                       </div>
@@ -396,7 +428,10 @@ export function StartScreen() {
       )}
 
       {/* Template Selection Dialog */}
-      <Dialog open={showTemplateSelection} onOpenChange={setShowTemplateSelection}>
+      <Dialog
+        open={showTemplateSelection}
+        onOpenChange={setShowTemplateSelection}
+      >
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Start Training</DialogTitle>
@@ -419,7 +454,7 @@ export function StartScreen() {
             {templates.map((template) => {
               const getExerciseName = (exerciseId: string) => {
                 const exercise = exercises.find((e) => e.id === exerciseId);
-                return exercise?.name || 'Unknown';
+                return exercise?.name || "Unknown";
               };
 
               return (
@@ -434,7 +469,9 @@ export function StartScreen() {
                   </CardHeader>
                   <CardContent>
                     {template.description && (
-                      <p className="text-xs text-muted-foreground mb-2">{template.description}</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {template.description}
+                      </p>
                     )}
                     {template.exerciseIds.length > 0 && (
                       <div className="space-y-1">
@@ -456,17 +493,24 @@ export function StartScreen() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+      <AlertDialog
+        open={!!deleteConfirmId}
+        onOpenChange={() => setDeleteConfirmId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Training</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this training? This will remove all sets and rounds. This action cannot be undone.
+              Are you sure you want to delete this training? This will remove
+              all sets and rounds. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTraining} variant="destructive">
+            <AlertDialogAction
+              onClick={handleDeleteTraining}
+              variant="destructive"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface TextareaWithSuggestionsProps {
   value: string;
@@ -22,14 +22,18 @@ export function TextareaWithSuggestions({
 }: TextareaWithSuggestionsProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (value.trim()) {
       const filtered = suggestions.filter((suggestion) =>
-        suggestion.toLowerCase().includes(value.toLowerCase())
+        suggestion.toLowerCase().includes(value.toLowerCase()),
       );
       setFilteredSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
@@ -70,29 +74,30 @@ export function TextareaWithSuggestions({
     textareaRef.current?.focus();
   };
 
-  const suggestionDropdown = showSuggestions && filteredSuggestions.length > 0 && (
-    <div 
-      className="fixed z-50 bg-background border rounded-md shadow-lg max-h-48 overflow-y-auto"
-      style={{
-        top: `${dropdownPosition.top}px`,
-        left: `${dropdownPosition.left}px`,
-        width: `${dropdownPosition.width}px`,
-      }}
-    >
-      <div className="p-1">
-        {filteredSuggestions.slice(0, 5).map((suggestion, index) => (
-          <Button
-            key={index}
-            variant="ghost"
-            className="w-full justify-start text-left h-auto py-2 px-2 whitespace-pre-wrap"
-            onClick={() => handleSelectSuggestion(suggestion)}
-          >
-            <span className="text-xs line-clamp-2">{suggestion}</span>
-          </Button>
-        ))}
+  const suggestionDropdown = showSuggestions &&
+    filteredSuggestions.length > 0 && (
+      <div
+        className="fixed z-50 bg-background border rounded-md shadow-lg max-h-48 overflow-y-auto"
+        style={{
+          top: `${dropdownPosition.top}px`,
+          left: `${dropdownPosition.left}px`,
+          width: `${dropdownPosition.width}px`,
+        }}
+      >
+        <div className="p-1">
+          {filteredSuggestions.slice(0, 5).map((suggestion, index) => (
+            <Button
+              key={index}
+              variant="ghost"
+              className="w-full justify-start text-left h-auto py-2 px-2 whitespace-pre-wrap"
+              onClick={() => handleSelectSuggestion(suggestion)}
+            >
+              <span className="text-xs line-clamp-2">{suggestion}</span>
+            </Button>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div ref={containerRef} className="relative">

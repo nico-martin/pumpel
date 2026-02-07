@@ -1,18 +1,32 @@
-import { useCallback, useEffect, useState } from 'react';
-import { updateTraining, deleteTraining, getAllWarmUps, getAllCoolDowns } from '@/db/trainings';
-import { getTrainingWithDetails, getLastUsedWeightForExercise } from '@/db/queries';
-import { createSet, deleteSet } from '@/db/sets';
-import { createRound, deleteRound } from '@/db/rounds';
-import { deleteRoundsBySetId } from '@/db/rounds';
-import { getUser } from '@/db/user';
-import type { Exercise, TrainingWithDetails } from '@/db/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ExerciseSelector } from '@/components/ExerciseSelector';
-import { TextareaWithSuggestions } from '@/components/TextareaWithSuggestions';
-import { Trash2, Edit, Check } from 'lucide-react';
-import { AddRound } from '@/components/trainingView/AddRound';
+import { useCallback, useEffect, useState } from "react";
+import {
+  updateTraining,
+  deleteTraining,
+  getAllWarmUps,
+  getAllCoolDowns,
+} from "@/db/trainings";
+import {
+  getTrainingWithDetails,
+  getLastUsedWeightForExercise,
+} from "@/db/queries";
+import { createSet, deleteSet } from "@/db/sets";
+import { createRound, deleteRound } from "@/db/rounds";
+import { deleteRoundsBySetId } from "@/db/rounds";
+import { getUser } from "@/db/user";
+import type { Exercise, TrainingWithDetails } from "@/db/types";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ExerciseSelector } from "@/components/ExerciseSelector";
+import { TextareaWithSuggestions } from "@/components/TextareaWithSuggestions";
+import { Trash2, Edit, Check } from "lucide-react";
+import { AddRound } from "@/components/trainingView/AddRound";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +36,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface TrainingViewProps {
   trainingId: string;
@@ -37,28 +51,33 @@ interface CurrentRound {
   notes: string;
 }
 
-export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = true }: TrainingViewProps) {
-  const [userName, setUserName] = useState<string>('');
+export function TrainingView({
+  trainingId,
+  onTrainingEnd,
+  onBack,
+  isActive = true,
+}: TrainingViewProps) {
+  const [userName, setUserName] = useState<string>("");
   const [training, setTraining] = useState<TrainingWithDetails | null>(null);
   const [currentSetId, setCurrentSetId] = useState<string | null>(null);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [currentRound, setCurrentRound] = useState<CurrentRound>({
-    weight: '',
-    reps: '9',
-    notes: '',
+    weight: "",
+    reps: "9",
+    notes: "",
   });
   const [duration, setDuration] = useState(0);
-  const [warmUp, setWarmUp] = useState('');
-  const [coolDown, setCoolDown] = useState('');
+  const [warmUp, setWarmUp] = useState("");
+  const [coolDown, setCoolDown] = useState("");
   const [isEditingWarmUp, setIsEditingWarmUp] = useState(false);
   const [isEditingCoolDown, setIsEditingCoolDown] = useState(false);
-  const [editWarmUpValue, setEditWarmUpValue] = useState('');
-  const [editCoolDownValue, setEditCoolDownValue] = useState('');
+  const [editWarmUpValue, setEditWarmUpValue] = useState("");
+  const [editCoolDownValue, setEditCoolDownValue] = useState("");
   const [isEditingDateTime, setIsEditingDateTime] = useState(false);
-  const [editStartDate, setEditStartDate] = useState('');
-  const [editStartTime, setEditStartTime] = useState('');
-  const [editEndDate, setEditEndDate] = useState('');
-  const [editEndTime, setEditEndTime] = useState('');
+  const [editStartDate, setEditStartDate] = useState("");
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndDate, setEditEndDate] = useState("");
+  const [editEndTime, setEditEndTime] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [warmUpSuggestions, setWarmUpSuggestions] = useState<string[]>([]);
   const [coolDownSuggestions, setCoolDownSuggestions] = useState<string[]>([]);
@@ -74,8 +93,8 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
     const details = await getTrainingWithDetails(trainingId);
     if (details) {
       setTraining(details);
-      setWarmUp(details.warmUp || '');
-      setCoolDown(details.calmDown || '');
+      setWarmUp(details.warmUp || "");
+      setCoolDown(details.calmDown || "");
       // Don't automatically select a set - let user click "Continue"
     }
   }, [trainingId]);
@@ -122,7 +141,10 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       }
 
       // Otherwise, get weight from previous trainings
-      const data = await getLastUsedWeightForExercise(currentSet.exerciseId, trainingId);
+      const data = await getLastUsedWeightForExercise(
+        currentSet.exerciseId,
+        trainingId,
+      );
       if (data) {
         setCurrentRound((prev) => ({
           ...prev,
@@ -133,11 +155,12 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
         const defaultWeight = currentSet.exercise.defaultWeight;
         setCurrentRound((prev) => ({
           ...prev,
-          weight: defaultWeight && defaultWeight > 0 ? defaultWeight.toString() : '',
+          weight:
+            defaultWeight && defaultWeight > 0 ? defaultWeight.toString() : "",
         }));
       }
     } catch (error) {
-      console.error('Error loading last used weight:', error);
+      console.error("Error loading last used weight:", error);
     }
   }, [currentSetId, training, trainingId]);
 
@@ -164,7 +187,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       // Then set current set ID, which will trigger the useEffect to load weight
       setCurrentSetId(newSet.id);
     } catch (error) {
-      console.error('Error creating set:', error);
+      console.error("Error creating set:", error);
     }
   };
 
@@ -186,10 +209,14 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       });
 
       // Reset to defaults, keeping the same weight
-      setCurrentRound((prev) => ({ weight: prev.weight, reps: '9', notes: '' }));
+      setCurrentRound((prev) => ({
+        weight: prev.weight,
+        reps: "9",
+        notes: "",
+      }));
       await loadTraining();
     } catch (error) {
-      console.error('Error adding round:', error);
+      console.error("Error adding round:", error);
     }
   };
 
@@ -213,7 +240,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       // For both active and completed trainings, go back
       onTrainingEnd();
     } catch (error) {
-      console.error('Error finishing training:', error);
+      console.error("Error finishing training:", error);
     }
   };
 
@@ -236,7 +263,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
 
       await loadTraining();
     } catch (error) {
-      console.error('Error deleting set:', error);
+      console.error("Error deleting set:", error);
     }
   };
 
@@ -245,7 +272,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       await deleteRound(roundId);
       await loadTraining();
     } catch (error) {
-      console.error('Error deleting round:', error);
+      console.error("Error deleting round:", error);
     }
   };
 
@@ -267,7 +294,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       setIsEditingWarmUp(false);
       await loadTraining();
     } catch (error) {
-      console.error('Error saving warm up:', error);
+      console.error("Error saving warm up:", error);
     }
   };
 
@@ -279,19 +306,19 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       setIsEditingCoolDown(false);
       await loadTraining();
     } catch (error) {
-      console.error('Error saving cool down:', error);
+      console.error("Error saving cool down:", error);
     }
   };
 
   const formatDateForInput = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const formatTimeForInput = (timestamp: number) => {
     const date = new Date(timestamp);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   };
 
@@ -308,7 +335,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
 
   const handleSaveDateTime = async () => {
     try {
-      const [startHours, startMinutes] = editStartTime.split(':').map(Number);
+      const [startHours, startMinutes] = editStartTime.split(":").map(Number);
       const startDate = new Date(editStartDate);
       startDate.setHours(startHours, startMinutes, 0, 0);
 
@@ -317,7 +344,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       };
 
       if (!isActive && editEndDate && editEndTime) {
-        const [endHours, endMinutes] = editEndTime.split(':').map(Number);
+        const [endHours, endMinutes] = editEndTime.split(":").map(Number);
         const endDate = new Date(editEndDate);
         endDate.setHours(endHours, endMinutes, 0, 0);
         updates.endTime = endDate.getTime();
@@ -327,7 +354,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       setIsEditingDateTime(false);
       await loadTraining();
     } catch (error) {
-      console.error('Error saving date/time:', error);
+      console.error("Error saving date/time:", error);
     }
   };
 
@@ -346,21 +373,21 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       await deleteTraining(trainingId);
       onTrainingEnd();
     } catch (error) {
-      console.error('Error deleting training:', error);
+      console.error("Error deleting training:", error);
     }
   };
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
@@ -384,14 +411,22 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
       <Card className="mb-4">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>{isActive ? 'Active Training' : 'Training'}</span>
+            <span>{isActive ? "Active Training" : "Training"}</span>
             <div className="flex gap-1">
               <Button
                 size="icon-xs"
                 variant="ghost"
-                onClick={isEditingDateTime ? handleSaveDateTime : handleStartEditDateTime}
+                onClick={
+                  isEditingDateTime
+                    ? handleSaveDateTime
+                    : handleStartEditDateTime
+                }
               >
-                {isEditingDateTime ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                {isEditingDateTime ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Edit className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 size="icon-xs"
@@ -406,7 +441,9 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
             <CardContent className="pt-3 space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs font-medium block mb-1">Start Date</label>
+                  <label className="text-xs font-medium block mb-1">
+                    Start Date
+                  </label>
                   <Input
                     type="date"
                     value={editStartDate}
@@ -414,7 +451,9 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">Start Time</label>
+                  <label className="text-xs font-medium block mb-1">
+                    Start Time
+                  </label>
                   <Input
                     type="time"
                     value={editStartTime}
@@ -425,7 +464,9 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
               {!isActive && (
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-xs font-medium block mb-1">End Date</label>
+                    <label className="text-xs font-medium block mb-1">
+                      End Date
+                    </label>
                     <Input
                       type="date"
                       value={editEndDate}
@@ -433,7 +474,9 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium block mb-1">End Time</label>
+                    <label className="text-xs font-medium block mb-1">
+                      End Time
+                    </label>
                     <Input
                       type="time"
                       value={editEndTime}
@@ -446,9 +489,15 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           ) : (
             <CardDescription>
               {isActive ? (
-                <>Started at {formatTime(training.startTime)} • {duration} min</>
+                <>
+                  Started at {formatTime(training.startTime)} • {duration} min
+                </>
               ) : (
-                <>{formatDate(training.startTime)} • {formatTime(training.startTime)} - {formatTime(training.endTime)}</>
+                <>
+                  {formatDate(training.startTime)} •{" "}
+                  {formatTime(training.startTime)} -{" "}
+                  {formatTime(training.endTime)}
+                </>
               )}
             </CardDescription>
           )}
@@ -460,12 +509,16 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Training</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this training? This will remove all sets and rounds. This action cannot be undone.
+              Are you sure you want to delete this training? This will remove
+              all sets and rounds. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTraining} variant="destructive">
+            <AlertDialogAction
+              onClick={handleDeleteTraining}
+              variant="destructive"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -481,9 +534,15 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
               <Button
                 size="icon-xs"
                 variant="ghost"
-                onClick={isEditingWarmUp ? handleSaveWarmUp : handleStartEditWarmUp}
+                onClick={
+                  isEditingWarmUp ? handleSaveWarmUp : handleStartEditWarmUp
+                }
               >
-                {isEditingWarmUp ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                {isEditingWarmUp ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Edit className="h-4 w-4" />
+                )}
               </Button>
             </CardTitle>
           </CardHeader>
@@ -499,7 +558,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
               />
             ) : (
               <p className="text-xs text-muted-foreground whitespace-pre-wrap">
-                {warmUp || 'Click edit to add warm up routine'}
+                {warmUp || "Click edit to add warm up routine"}
               </p>
             )}
           </CardContent>
@@ -507,85 +566,91 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
 
         {/* Exercise Sets */}
         {training.sets.map((set, idx) => (
-            <Card
-              key={set.id}
-              size="sm"
-              className={currentSetId === set.id ? 'ring-2 ring-primary' : ''}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>
-                    {idx + 1}. {set.exercise.name}
-                  </span>
-                  <div className="flex gap-1">
-                    {currentSetId !== set.id && (
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        onClick={() => setCurrentSetId(set.id)}
-                      >
-                        Continue
-                      </Button>
-                    )}
+          <Card
+            key={set.id}
+            size="sm"
+            className={currentSetId === set.id ? "ring-2 ring-primary" : ""}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>
+                  {idx + 1}. {set.exercise.name}
+                </span>
+                <div className="flex gap-1">
+                  {currentSetId !== set.id && (
                     <Button
-                      size="icon-xs"
-                      variant="destructive"
-                      onClick={() => handleDeleteSet(set.id)}
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => setCurrentSetId(set.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      Continue
                     </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {set.rounds.length > 0 && (
-                  <div className="space-y-1 mb-3">
-                    {set.rounds.map((round, roundIdx) => (
-                      <div key={round.id} className="flex gap-2 text-xs items-center">
-                        <span className="text-muted-foreground w-8">
-                          #{roundIdx + 1}
+                  )}
+                  <Button
+                    size="icon-xs"
+                    variant="destructive"
+                    onClick={() => handleDeleteSet(set.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {set.rounds.length > 0 && (
+                <div className="space-y-1 mb-3">
+                  {set.rounds.map((round, roundIdx) => (
+                    <div
+                      key={round.id}
+                      className="flex gap-2 text-xs items-center"
+                    >
+                      <span className="text-muted-foreground w-8">
+                        #{roundIdx + 1}
+                      </span>
+                      <span className="font-medium">
+                        {round.weight}
+                        {set.exercise.weightUnit}
+                      </span>
+                      <span className="text-muted-foreground">×</span>
+                      <span className="font-medium">{round.reps} reps</span>
+                      {round.notes && (
+                        <span className="text-muted-foreground ml-2">
+                          {round.notes}
                         </span>
-                        <span className="font-medium">{round.weight}{set.exercise.weightUnit}</span>
-                        <span className="text-muted-foreground">×</span>
-                        <span className="font-medium">{round.reps} reps</span>
-                        {round.notes && (
-                          <span className="text-muted-foreground ml-2">
-                            {round.notes}
-                          </span>
-                        )}
-                        <Button
-                          size="icon-xs"
-                          variant="ghost"
-                          onClick={() => handleDeleteRound(round.id)}
-                          className="ml-auto"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Add Round Section - shown when this set is active */}
-                {currentSetId === set.id && (
-                  <AddRound
-                    exerciseName={set.exercise.name}
-                    exerciseId={set.exerciseId}
-                    trainingId={trainingId}
-                    weightUnit={set.exercise.weightUnit}
-                    steps={set.exercise.steps}
-                    currentRound={currentRound}
-                    onRoundChange={(field, value) =>
-                      setCurrentRound((prev) => ({ ...prev, [field]: value }))
-                    }
-                    onAddRound={handleAddRound}
-                    onStartNewSet={handleStartNewSet}
-                    inline={true}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                      )}
+                      <Button
+                        size="icon-xs"
+                        variant="ghost"
+                        onClick={() => handleDeleteRound(round.id)}
+                        className="ml-auto"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Round Section - shown when this set is active */}
+              {currentSetId === set.id && (
+                <AddRound
+                  exerciseName={set.exercise.name}
+                  exerciseId={set.exerciseId}
+                  trainingId={trainingId}
+                  weightUnit={set.exercise.weightUnit}
+                  steps={set.exercise.steps}
+                  currentRound={currentRound}
+                  onRoundChange={(field, value) =>
+                    setCurrentRound((prev) => ({ ...prev, [field]: value }))
+                  }
+                  onAddRound={handleAddRound}
+                  onStartNewSet={handleStartNewSet}
+                  inline={true}
+                />
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {showExerciseSelector ? (
@@ -605,10 +670,12 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
             </Button>
           </CardContent>
         </Card>
-      ) : !currentSetId && (
-        <Button className="w-full" onClick={handleStartNewSet}>
-          Start New Set
-        </Button>
+      ) : (
+        !currentSetId && (
+          <Button className="w-full" onClick={handleStartNewSet}>
+            Start New Set
+          </Button>
+        )
       )}
 
       {/* Cool Down Card */}
@@ -619,9 +686,15 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
             <Button
               size="icon-xs"
               variant="ghost"
-              onClick={isEditingCoolDown ? handleSaveCoolDown : handleStartEditCoolDown}
+              onClick={
+                isEditingCoolDown ? handleSaveCoolDown : handleStartEditCoolDown
+              }
             >
-              {isEditingCoolDown ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+              {isEditingCoolDown ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Edit className="h-4 w-4" />
+              )}
             </Button>
           </CardTitle>
         </CardHeader>
@@ -637,7 +710,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
             />
           ) : (
             <p className="text-xs text-muted-foreground whitespace-pre-wrap">
-              {coolDown || 'Click edit to add cool down routine'}
+              {coolDown || "Click edit to add cool down routine"}
             </p>
           )}
         </CardContent>
@@ -652,7 +725,8 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
           )}
           {isActive && training && training.sets.length > 0 && (
             <p className="text-xs text-muted-foreground text-center mb-2">
-              Great work, {userName}! {training.sets.length} {training.sets.length === 1 ? 'set' : 'sets'} completed.
+              Great work, {userName}! {training.sets.length}{" "}
+              {training.sets.length === 1 ? "set" : "sets"} completed.
             </p>
           )}
           <Button
@@ -660,7 +734,7 @@ export function TrainingView({ trainingId, onTrainingEnd, onBack, isActive = tru
             className="w-full"
             onClick={handleFinishTraining}
           >
-            {isActive ? 'Finish Training' : 'Update'}
+            {isActive ? "Finish Training" : "Update"}
           </Button>
         </div>
       </div>

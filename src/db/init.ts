@@ -1,5 +1,12 @@
-import { openDB, type IDBPDatabase } from 'idb';
-import type { Exercise, Training, Set, Round, User, TrainingTemplate } from './types';
+import { openDB, type IDBPDatabase } from "idb";
+import type {
+  Exercise,
+  Training,
+  Set,
+  Round,
+  User,
+  TrainingTemplate,
+} from "./types";
 
 // Define the database schema
 export interface WorkoutTrackerDB {
@@ -19,7 +26,7 @@ export interface WorkoutTrackerDB {
     indexes: {
       trainingId: string;
       exerciseId: string;
-      'exerciseId-trainingId': [string, string];
+      "exerciseId-trainingId": [string, string];
     };
   };
   rounds: {
@@ -38,7 +45,7 @@ export interface WorkoutTrackerDB {
   };
 }
 
-const DB_NAME = 'workoutTrackerDB';
+const DB_NAME = "workoutTrackerDB";
 const DB_VERSION = 5;
 
 let dbInstance: IDBPDatabase<WorkoutTrackerDB> | null = null;
@@ -50,57 +57,61 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
 
   dbInstance = await openDB<WorkoutTrackerDB>(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion, _newVersion, transaction) {
-
       // Create exercises store
-      if (!db.objectStoreNames.contains('exercises')) {
-        const exercisesStore = db.createObjectStore('exercises', {
-          keyPath: 'id',
+      if (!db.objectStoreNames.contains("exercises")) {
+        const exercisesStore = db.createObjectStore("exercises", {
+          keyPath: "id",
         });
-        exercisesStore.createIndex('name', 'name', { unique: true });
+        exercisesStore.createIndex("name", "name", { unique: true });
       }
 
       // Create trainings store
-      if (!db.objectStoreNames.contains('trainings')) {
-        const trainingsStore = db.createObjectStore('trainings', {
-          keyPath: 'id',
+      if (!db.objectStoreNames.contains("trainings")) {
+        const trainingsStore = db.createObjectStore("trainings", {
+          keyPath: "id",
         });
-        trainingsStore.createIndex('startTime', 'startTime');
-        trainingsStore.createIndex('endTime', 'endTime');
+        trainingsStore.createIndex("startTime", "startTime");
+        trainingsStore.createIndex("endTime", "endTime");
       }
 
       // Create sets store
-      if (!db.objectStoreNames.contains('sets')) {
-        const setsStore = db.createObjectStore('sets', {
-          keyPath: 'id',
+      if (!db.objectStoreNames.contains("sets")) {
+        const setsStore = db.createObjectStore("sets", {
+          keyPath: "id",
         });
-        setsStore.createIndex('trainingId', 'trainingId');
-        setsStore.createIndex('exerciseId', 'exerciseId');
-        setsStore.createIndex('exerciseId-trainingId', ['exerciseId', 'trainingId']);
+        setsStore.createIndex("trainingId", "trainingId");
+        setsStore.createIndex("exerciseId", "exerciseId");
+        setsStore.createIndex("exerciseId-trainingId", [
+          "exerciseId",
+          "trainingId",
+        ]);
       }
 
       // Create rounds store
-      if (!db.objectStoreNames.contains('rounds')) {
-        const roundsStore = db.createObjectStore('rounds', {
-          keyPath: 'id',
+      if (!db.objectStoreNames.contains("rounds")) {
+        const roundsStore = db.createObjectStore("rounds", {
+          keyPath: "id",
         });
-        roundsStore.createIndex('setId', 'setId');
+        roundsStore.createIndex("setId", "setId");
       }
 
       // Create user store (version 2)
-      if (!db.objectStoreNames.contains('user')) {
-        db.createObjectStore('user', {
-          keyPath: 'id',
+      if (!db.objectStoreNames.contains("user")) {
+        db.createObjectStore("user", {
+          keyPath: "id",
         });
       }
 
       // Migrate existing exercises to add weightUnit and steps (version 3)
       if (oldVersion < 3) {
-        const exercisesStore = transaction.objectStore('exercises');
-        exercisesStore.openCursor().then(function updateExercise(cursor): Promise<void> | undefined {
+        const exercisesStore = transaction.objectStore("exercises");
+        exercisesStore.openCursor().then(function updateExercise(cursor):
+          | Promise<void>
+          | undefined {
           if (!cursor) return;
           const exercise = cursor.value as Exercise;
           if (!exercise.weightUnit) {
-            exercise.weightUnit = 'kg';
+            exercise.weightUnit = "kg";
           }
           if (!exercise.steps) {
             exercise.steps = 1;
@@ -111,17 +122,19 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
       }
 
       // Create training templates store (version 4)
-      if (!db.objectStoreNames.contains('trainingTemplates')) {
-        const templatesStore = db.createObjectStore('trainingTemplates', {
-          keyPath: 'id',
+      if (!db.objectStoreNames.contains("trainingTemplates")) {
+        const templatesStore = db.createObjectStore("trainingTemplates", {
+          keyPath: "id",
         });
-        templatesStore.createIndex('name', 'name');
+        templatesStore.createIndex("name", "name");
       }
 
       // Add defaultWeight to exercises (version 5)
       if (oldVersion < 5) {
-        const exercisesStore = transaction.objectStore('exercises');
-        exercisesStore.openCursor().then(function updateExercise(cursor): Promise<void> | undefined {
+        const exercisesStore = transaction.objectStore("exercises");
+        exercisesStore.openCursor().then(function updateExercise(cursor):
+          | Promise<void>
+          | undefined {
           if (!cursor) return;
           const exercise = cursor.value as Exercise;
           if (exercise.defaultWeight === undefined) {
@@ -133,10 +146,10 @@ export async function initDB(): Promise<IDBPDatabase<WorkoutTrackerDB>> {
       }
     },
     blocked() {
-      console.warn('Database upgrade blocked. Please close other tabs.');
+      console.warn("Database upgrade blocked. Please close other tabs.");
     },
     blocking() {
-      console.warn('Database is blocking a newer version.');
+      console.warn("Database is blocking a newer version.");
     },
   });
 

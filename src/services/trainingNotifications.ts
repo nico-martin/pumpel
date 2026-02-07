@@ -1,5 +1,5 @@
 // Training notification tag - constant to update same notification
-const TRAINING_NOTIFICATION_TAG = 'active-training';
+const TRAINING_NOTIFICATION_TAG = "active-training";
 
 export interface TrainingNotificationData {
   trainingId: string;
@@ -21,8 +21,8 @@ interface ExtendedNotificationOptions extends NotificationOptions {
  * Setup and request notification permissions
  */
 export async function setupTrainingNotifications(): Promise<ServiceWorkerRegistration | null> {
-  if (!('serviceWorker' in navigator) || !('Notification' in window)) {
-    console.log('Service Worker or Notifications not supported');
+  if (!("serviceWorker" in navigator) || !("Notification" in window)) {
+    console.log("Service Worker or Notifications not supported");
     return null;
   }
 
@@ -33,14 +33,14 @@ export async function setupTrainingNotifications(): Promise<ServiceWorkerRegistr
     // Request notification permission
     const permission = await Notification.requestPermission();
 
-    if (permission !== 'granted') {
-      console.log('Notification permission denied');
+    if (permission !== "granted") {
+      console.log("Notification permission denied");
       return null;
     }
 
     return registration;
   } catch (error) {
-    console.error('Error setting up notifications:', error);
+    console.error("Error setting up notifications:", error);
     return null;
   }
 }
@@ -51,12 +51,12 @@ export async function setupTrainingNotifications(): Promise<ServiceWorkerRegistr
 export async function showTrainingNotification(
   trainingId: string,
   startTime: number,
-  elapsedMinutes: number
+  elapsedMinutes: number,
 ): Promise<void> {
   try {
     const registration = await navigator.serviceWorker.ready;
 
-    if (!registration || Notification.permission !== 'granted') {
+    if (!registration || Notification.permission !== "granted") {
       return;
     }
 
@@ -66,25 +66,23 @@ export async function showTrainingNotification(
 
     const options: ExtendedNotificationOptions = {
       body: `Training in progress - ${timeStr}`,
-      icon: '/badge.png',
-      badge: '/badge.png',
+      icon: "/badge.png",
+      badge: "/badge.png",
       tag: TRAINING_NOTIFICATION_TAG,
       requireInteraction: true,
       silent: true,
       data: {
-        type: 'training-active',
+        type: "training-active",
         trainingId,
         startTime,
-        url: `/training/${trainingId}`
+        url: `/training/${trainingId}`,
       },
-      actions: [
-        { action: 'open', title: 'Open' }
-      ]
+      actions: [{ action: "open", title: "Open" }],
     };
 
-    await registration.showNotification('Active Training', options);
+    await registration.showNotification("Active Training", options);
   } catch (error) {
-    console.error('Error showing training notification:', error);
+    console.error("Error showing training notification:", error);
   }
 }
 
@@ -100,12 +98,12 @@ export async function closeTrainingNotifications(): Promise<void> {
     }
 
     const notifications = await registration.getNotifications({
-      tag: TRAINING_NOTIFICATION_TAG
+      tag: TRAINING_NOTIFICATION_TAG,
     });
 
-    notifications.forEach(notification => notification.close());
+    notifications.forEach((notification) => notification.close());
   } catch (error) {
-    console.error('Error closing training notifications:', error);
+    console.error("Error closing training notifications:", error);
   }
 }
 
@@ -113,12 +111,12 @@ export async function closeTrainingNotifications(): Promise<void> {
  * Check if notifications are supported and enabled
  */
 export function areNotificationsSupported(): boolean {
-  return 'serviceWorker' in navigator && 'Notification' in window;
+  return "serviceWorker" in navigator && "Notification" in window;
 }
 
 /**
  * Check if notification permission is granted
  */
 export function hasNotificationPermission(): boolean {
-  return areNotificationsSupported() && Notification.permission === 'granted';
+  return areNotificationsSupported() && Notification.permission === "granted";
 }

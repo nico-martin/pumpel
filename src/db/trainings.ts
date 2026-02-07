@@ -1,6 +1,6 @@
-import { getDB } from './init';
-import { generateUUID, getCurrentTimestamp } from './utils';
-import type { Training, TrainingInput } from './types';
+import { getDB } from "./init";
+import { generateUUID, getCurrentTimestamp } from "./utils";
+import type { Training, TrainingInput } from "./types";
 
 // Create a new training session
 export async function createTraining(input: TrainingInput): Promise<Training> {
@@ -10,27 +10,29 @@ export async function createTraining(input: TrainingInput): Promise<Training> {
     id: generateUUID(),
     createdAt: getCurrentTimestamp(),
   };
-  await db.add('trainings', training);
+  await db.add("trainings", training);
   return training;
 }
 
 // Get a training by ID
 export async function getTraining(id: string): Promise<Training | undefined> {
   const db = await getDB();
-  return db.get('trainings', id);
+  return db.get("trainings", id);
 }
 
 // Get all trainings
 export async function getAllTrainings(): Promise<Training[]> {
   const db = await getDB();
-  return db.getAll('trainings');
+  return db.getAll("trainings");
 }
 
 // Get trainings ordered by start time (most recent first)
-export async function getTrainingsByStartTime(limit?: number): Promise<Training[]> {
+export async function getTrainingsByStartTime(
+  limit?: number,
+): Promise<Training[]> {
   const db = await getDB();
-  const tx = db.transaction('trainings', 'readonly');
-  const index = tx.store.index('startTime');
+  const tx = db.transaction("trainings", "readonly");
+  const index = tx.store.index("startTime");
 
   let trainings = await index.getAll();
   trainings.sort((a, b) => b.startTime - a.startTime); // DESC order
@@ -45,20 +47,23 @@ export async function getTrainingsByStartTime(limit?: number): Promise<Training[
 // Get trainings within a date range
 export async function getTrainingsByDateRange(
   startDate: number,
-  endDate: number
+  endDate: number,
 ): Promise<Training[]> {
   const db = await getDB();
-  const tx = db.transaction('trainings', 'readonly');
-  const index = tx.store.index('startTime');
+  const tx = db.transaction("trainings", "readonly");
+  const index = tx.store.index("startTime");
 
   const trainings = await index.getAll(IDBKeyRange.bound(startDate, endDate));
   return trainings.sort((a, b) => b.startTime - a.startTime);
 }
 
 // Update a training
-export async function updateTraining(id: string, updates: Partial<TrainingInput>): Promise<Training> {
+export async function updateTraining(
+  id: string,
+  updates: Partial<TrainingInput>,
+): Promise<Training> {
   const db = await getDB();
-  const existing = await db.get('trainings', id);
+  const existing = await db.get("trainings", id);
   if (!existing) {
     throw new Error(`Training with id ${id} not found`);
   }
@@ -66,25 +71,27 @@ export async function updateTraining(id: string, updates: Partial<TrainingInput>
     ...existing,
     ...updates,
   };
-  await db.put('trainings', updated);
+  await db.put("trainings", updated);
   return updated;
 }
 
 // Delete a training
 export async function deleteTraining(id: string): Promise<void> {
   const db = await getDB();
-  await db.delete('trainings', id);
+  await db.delete("trainings", id);
 }
 
 // Get the current active training (one that has started but not ended)
 export async function getActiveTraining(): Promise<Training | null> {
   const db = await getDB();
-  const allTrainings = await db.getAll('trainings');
+  const allTrainings = await db.getAll("trainings");
   const now = getCurrentTimestamp();
 
   // Find training where startTime <= now and (endTime is 0 or endTime > now)
   const activeTraining = allTrainings.find(
-    (training) => training.startTime <= now && (training.endTime === 0 || training.endTime > now)
+    (training) =>
+      training.startTime <= now &&
+      (training.endTime === 0 || training.endTime > now),
   );
 
   return activeTraining || null;
@@ -93,8 +100,8 @@ export async function getActiveTraining(): Promise<Training | null> {
 // Get all unique warm up entries (non-empty, sorted by most recent usage)
 export async function getAllWarmUps(): Promise<string[]> {
   const db = await getDB();
-  const trainings = await db.getAll('trainings');
-  
+  const trainings = await db.getAll("trainings");
+
   // Get unique warm ups with their most recent usage timestamp
   const warmUpMap = new Map<string, number>();
   trainings.forEach((training) => {
@@ -115,8 +122,8 @@ export async function getAllWarmUps(): Promise<string[]> {
 // Get all unique cool down entries (non-empty, sorted by most recent usage)
 export async function getAllCoolDowns(): Promise<string[]> {
   const db = await getDB();
-  const trainings = await db.getAll('trainings');
-  
+  const trainings = await db.getAll("trainings");
+
   // Get unique cool downs with their most recent usage timestamp
   const coolDownMap = new Map<string, number>();
   trainings.forEach((training) => {

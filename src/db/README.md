@@ -28,7 +28,7 @@ This database layer provides a complete IndexedDB implementation for the workout
 ### Initialize Database
 
 ```typescript
-import { initDB } from './db';
+import { initDB } from "./db";
 
 // Initialize on app startup
 await initDB();
@@ -37,25 +37,25 @@ await initDB();
 ### Create an Exercise
 
 ```typescript
-import { createExercise } from './db';
+import { createExercise } from "./db";
 
 const benchPress = await createExercise({
-  name: 'Bench Press',
-  description: 'Lie on a bench and press the barbell upward',
-  type: 'strength'
+  name: "Bench Press",
+  description: "Lie on a bench and press the barbell upward",
+  type: "strength",
 });
 ```
 
 ### Add a Complete Training Session
 
 ```typescript
-import { addCompleteTraining } from './db';
+import { addCompleteTraining } from "./db";
 
 const training = await addCompleteTraining({
   training: {
-    name: 'Monday Upper Body',
-    warmUp: '5 minutes light cardio',
-    calmDown: 'Stretching routine',
+    name: "Monday Upper Body",
+    warmUp: "5 minutes light cardio",
+    calmDown: "Stretching routine",
     startTime: Date.now(),
     endTime: Date.now() + 3600000, // 1 hour later
   },
@@ -69,7 +69,7 @@ const training = await addCompleteTraining({
             { weight: 60, reps: 12 },
             { weight: 60, reps: 10 },
             { weight: 60, reps: 8 },
-          ]
+          ],
         },
         {
           restPeriod: 90,
@@ -77,18 +77,18 @@ const training = await addCompleteTraining({
             { weight: 70, reps: 10 },
             { weight: 70, reps: 8 },
             { weight: 70, reps: 6 },
-          ]
-        }
-      ]
-    }
-  ]
+          ],
+        },
+      ],
+    },
+  ],
 });
 ```
 
 ### Get Training with All Details
 
 ```typescript
-import { getTrainingWithDetails } from './db';
+import { getTrainingWithDetails } from "./db";
 
 const trainingDetails = await getTrainingWithDetails(training.id);
 // Returns training with all sets, exercises, and rounds nested
@@ -97,7 +97,7 @@ const trainingDetails = await getTrainingWithDetails(training.id);
 ### Get Exercise History
 
 ```typescript
-import { getExerciseHistory } from './db';
+import { getExerciseHistory } from "./db";
 
 const history = await getExerciseHistory(benchPress.id);
 // Returns all trainings where this exercise was performed,
@@ -107,7 +107,7 @@ const history = await getExerciseHistory(benchPress.id);
 ### Get Last Used Weight for Exercise
 
 ```typescript
-import { getLastUsedWeightForExercise } from './db';
+import { getLastUsedWeightForExercise } from "./db";
 
 const lastUsed = await getLastUsedWeightForExercise(benchPress.id);
 // Returns: { weight: 70, reps: 6, date: 1234567890 }
@@ -116,9 +116,9 @@ const lastUsed = await getLastUsedWeightForExercise(benchPress.id);
 ### Query Trainings by Date Range
 
 ```typescript
-import { getTrainingsByDateRange } from './db';
+import { getTrainingsByDateRange } from "./db";
 
-const startOfWeek = Date.now() - (7 * 24 * 60 * 60 * 1000);
+const startOfWeek = Date.now() - 7 * 24 * 60 * 60 * 1000;
 const now = Date.now();
 
 const weekTrainings = await getTrainingsByDateRange(startOfWeek, now);

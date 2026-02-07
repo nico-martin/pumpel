@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getAllExercises, createExercise, updateExercise, deleteExercise } from '@/db/exercises';
-import { getSetsByExerciseId } from '@/db/sets';
-import { getUser } from '@/db/user';
-import type { Exercise } from '@/db/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getAllExercises,
+  createExercise,
+  updateExercise,
+  deleteExercise,
+} from "@/db/exercises";
+import { getSetsByExerciseId } from "@/db/sets";
+import { getUser } from "@/db/user";
+import type { Exercise } from "@/db/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,23 +20,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Trash2, Edit, ChevronLeft, Plus } from 'lucide-react';
-import { ExerciseForm } from '@/components/exercises/ExerciseForm';
+} from "@/components/ui/alert-dialog";
+import { Trash2, Edit, ChevronLeft, Plus } from "lucide-react";
+import { ExerciseForm } from "@/components/exercises/ExerciseForm";
 
 export function ExercisesPage() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState<string>('');
+  const [userName, setUserName] = useState<string>("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editBodyPart, setEditBodyPart] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editWeightUnit, setEditWeightUnit] = useState<'kg' | 'lb'>('kg');
-  const [editSteps, setEditSteps] = useState('1');
-  const [editDefaultWeight, setEditDefaultWeight] = useState('0');
+  const [editName, setEditName] = useState("");
+  const [editBodyPart, setEditBodyPart] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editWeightUnit, setEditWeightUnit] = useState<"kg" | "lb">("kg");
+  const [editSteps, setEditSteps] = useState("1");
+  const [editDefaultWeight, setEditDefaultWeight] = useState("0");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -53,30 +58,30 @@ export function ExercisesPage() {
       const allExercises = await getAllExercises();
       setExercises(allExercises);
     } catch (error) {
-      console.error('Error loading exercises:', error);
+      console.error("Error loading exercises:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateClick = () => {
-    setEditName('');
-    setEditBodyPart('');
-    setEditDescription('');
-    setEditWeightUnit('kg');
-    setEditSteps('1');
-    setEditDefaultWeight('0');
+    setEditName("");
+    setEditBodyPart("");
+    setEditDescription("");
+    setEditWeightUnit("kg");
+    setEditSteps("1");
+    setEditDefaultWeight("0");
     setShowCreateDialog(true);
   };
 
   const handleEditClick = (exercise: Exercise) => {
     setEditingExercise(exercise);
     setEditName(exercise.name);
-    setEditBodyPart(exercise.bodyPart || '');
-    setEditDescription(exercise.description || '');
-    setEditWeightUnit(exercise.weightUnit || 'kg');
-    setEditSteps(exercise.steps?.toString() || '1');
-    setEditDefaultWeight(exercise.defaultWeight?.toString() || '0');
+    setEditBodyPart(exercise.bodyPart || "");
+    setEditDescription(exercise.description || "");
+    setEditWeightUnit(exercise.weightUnit || "kg");
+    setEditSteps(exercise.steps?.toString() || "1");
+    setEditDefaultWeight(exercise.defaultWeight?.toString() || "0");
   };
 
   const handleCreateSave = async () => {
@@ -84,13 +89,13 @@ export function ExercisesPage() {
 
     const steps = parseFloat(editSteps);
     if (isNaN(steps) || steps <= 0) {
-      alert('Steps must be a positive number');
+      alert("Steps must be a positive number");
       return;
     }
 
     const defaultWeight = parseFloat(editDefaultWeight);
     if (isNaN(defaultWeight) || defaultWeight < 0) {
-      alert('Default weight must be a non-negative number');
+      alert("Default weight must be a non-negative number");
       return;
     }
 
@@ -106,7 +111,7 @@ export function ExercisesPage() {
       setShowCreateDialog(false);
       await loadExercises();
     } catch (error) {
-      console.error('Error creating exercise:', error);
+      console.error("Error creating exercise:", error);
     }
   };
 
@@ -115,13 +120,13 @@ export function ExercisesPage() {
 
     const steps = parseFloat(editSteps);
     if (isNaN(steps) || steps <= 0) {
-      alert('Steps must be a positive number');
+      alert("Steps must be a positive number");
       return;
     }
 
     const defaultWeight = parseFloat(editDefaultWeight);
     if (isNaN(defaultWeight) || defaultWeight < 0) {
-      alert('Default weight must be a non-negative number');
+      alert("Default weight must be a non-negative number");
       return;
     }
 
@@ -137,7 +142,7 @@ export function ExercisesPage() {
       setEditingExercise(null);
       await loadExercises();
     } catch (error) {
-      console.error('Error updating exercise:', error);
+      console.error("Error updating exercise:", error);
     }
   };
 
@@ -145,7 +150,9 @@ export function ExercisesPage() {
     // Check if exercise is used in any sets
     const sets = await getSetsByExerciseId(exerciseId);
     if (sets.length > 0) {
-      setDeleteError(`Cannot delete this exercise. It is used in ${sets.length} set(s).`);
+      setDeleteError(
+        `Cannot delete this exercise. It is used in ${sets.length} set(s).`,
+      );
       setDeleteConfirmId(exerciseId);
       return;
     }
@@ -162,7 +169,7 @@ export function ExercisesPage() {
       setDeleteConfirmId(null);
       await loadExercises();
     } catch (error) {
-      console.error('Error deleting exercise:', error);
+      console.error("Error deleting exercise:", error);
     }
   };
 
@@ -180,14 +187,16 @@ export function ExercisesPage() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="shrink-0"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-bold">Exercises</h1>
       </div>
-      <p className="text-muted-foreground mb-6 ml-12">{userName}'s exercise library</p>
+      <p className="text-muted-foreground mb-6 ml-12">
+        {userName}'s exercise library
+      </p>
 
       <Button onClick={handleCreateClick} size="lg" className="w-full mb-6">
         <Plus className="h-5 w-5 mr-2" />
@@ -213,7 +222,9 @@ export function ExercisesPage() {
                           <span>•</span>
                         </>
                       )}
-                      <span>{exercise.weightUnit} / {exercise.steps} step</span>
+                      <span>
+                        {exercise.weightUnit} / {exercise.steps} step
+                      </span>
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -236,7 +247,9 @@ export function ExercisesPage() {
               </CardHeader>
               {exercise.description && (
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">{exercise.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {exercise.description}
+                  </p>
                 </CardContent>
               )}
             </Card>
@@ -277,7 +290,10 @@ export function ExercisesPage() {
       </AlertDialog>
 
       {/* Edit Dialog */}
-      <AlertDialog open={!!editingExercise} onOpenChange={() => setEditingExercise(null)}>
+      <AlertDialog
+        open={!!editingExercise}
+        onOpenChange={() => setEditingExercise(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Edit Exercise</AlertDialogTitle>
@@ -301,22 +317,24 @@ export function ExercisesPage() {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSaveEdit}>
-              Save
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleSaveEdit}>Save</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+      <AlertDialog
+        open={!!deleteConfirmId}
+        onOpenChange={() => setDeleteConfirmId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteError ? 'Cannot Delete Exercise' : 'Delete Exercise'}
+              {deleteError ? "Cannot Delete Exercise" : "Delete Exercise"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteError || 'Are you sure you want to delete this exercise? This action cannot be undone.'}
+              {deleteError ||
+                "Are you sure you want to delete this exercise? This action cannot be undone."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -327,7 +345,10 @@ export function ExercisesPage() {
             ) : (
               <>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteConfirm} variant="destructive">
+                <AlertDialogAction
+                  onClick={handleDeleteConfirm}
+                  variant="destructive"
+                >
                   Delete
                 </AlertDialogAction>
               </>

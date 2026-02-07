@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react';
-import { getTrainingWithDetails } from '@/db/queries';
-import type { TrainingWithDetails } from '@/db/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { useEffect, useState } from "react";
+import { getTrainingWithDetails } from "@/db/queries";
+import type { TrainingWithDetails } from "@/db/types";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 
 interface TrainingDetailsProps {
   trainingId: string;
@@ -11,16 +17,16 @@ interface TrainingDetailsProps {
 
 const formatDate = (timestamp: number) => {
   const date = new Date(timestamp);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
 };
 
 const formatTime = (timestamp: number) => {
   const date = new Date(timestamp);
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 
@@ -38,7 +44,7 @@ export function TrainingDetails({ trainingId, onBack }: TrainingDetailsProps) {
       const details = await getTrainingWithDetails(trainingId);
       setTraining(details);
     } catch (error) {
-      console.error('Error loading training:', error);
+      console.error("Error loading training:", error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +66,9 @@ export function TrainingDetails({ trainingId, onBack }: TrainingDetailsProps) {
     );
   }
 
-  const durationMinutes = Math.floor((training.endTime - training.startTime) / 1000 / 60);
+  const durationMinutes = Math.floor(
+    (training.endTime - training.startTime) / 1000 / 60,
+  );
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
   const duration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
@@ -73,9 +81,10 @@ export function TrainingDetails({ trainingId, onBack }: TrainingDetailsProps) {
 
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>{training.name || 'Training'}</CardTitle>
+          <CardTitle>{training.name || "Training"}</CardTitle>
           <CardDescription>
-            {formatDate(training.startTime)} • {formatTime(training.startTime)} - {formatTime(training.endTime)} • {duration}
+            {formatDate(training.startTime)} • {formatTime(training.startTime)}{" "}
+            - {formatTime(training.endTime)} • {duration}
           </CardDescription>
         </CardHeader>
         {(training.notes || training.warmUp || training.calmDown) && (
@@ -83,19 +92,25 @@ export function TrainingDetails({ trainingId, onBack }: TrainingDetailsProps) {
             {training.warmUp && (
               <div className="mb-2">
                 <p className="text-xs font-medium">Warm Up</p>
-                <p className="text-xs text-muted-foreground">{training.warmUp}</p>
+                <p className="text-xs text-muted-foreground">
+                  {training.warmUp}
+                </p>
               </div>
             )}
             {training.calmDown && (
               <div className="mb-2">
                 <p className="text-xs font-medium">Cool Down</p>
-                <p className="text-xs text-muted-foreground">{training.calmDown}</p>
+                <p className="text-xs text-muted-foreground">
+                  {training.calmDown}
+                </p>
               </div>
             )}
             {training.notes && (
               <div>
                 <p className="text-xs font-medium">Notes</p>
-                <p className="text-xs text-muted-foreground">{training.notes}</p>
+                <p className="text-xs text-muted-foreground">
+                  {training.notes}
+                </p>
               </div>
             )}
           </CardContent>
@@ -137,7 +152,9 @@ export function TrainingDetails({ trainingId, onBack }: TrainingDetailsProps) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground text-center">No exercises recorded</p>
+        <p className="text-sm text-muted-foreground text-center">
+          No exercises recorded
+        </p>
       )}
     </div>
   );

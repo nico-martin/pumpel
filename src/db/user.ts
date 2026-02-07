@@ -1,12 +1,12 @@
-import { getDB } from './init';
-import type { User, UserInput } from './types';
+import { getDB } from "./init";
+import type { User, UserInput } from "./types";
 
-const USER_ID = 'user'; // Single user record
+const USER_ID = "user"; // Single user record
 
 // Get user data
 export async function getUser(): Promise<User | undefined> {
   const db = await getDB();
-  return db.get('user', USER_ID);
+  return db.get("user", USER_ID);
 }
 
 // Create or update user data
@@ -15,7 +15,7 @@ export async function saveUser(input: UserInput): Promise<User> {
   const now = Date.now();
 
   // Check if user already exists
-  const existingUser = await db.get('user', USER_ID);
+  const existingUser = await db.get("user", USER_ID);
 
   const user: User = {
     id: USER_ID,
@@ -24,7 +24,7 @@ export async function saveUser(input: UserInput): Promise<User> {
     updatedAt: now,
   };
 
-  await db.put('user', user);
+  await db.put("user", user);
   return user;
 }
 

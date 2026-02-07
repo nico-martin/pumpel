@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { getAllExercises, createExercise } from '@/db/exercises';
-import type { Exercise } from '@/db/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from "react";
+import { getAllExercises, createExercise } from "@/db/exercises";
+import type { Exercise } from "@/db/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,24 +11,29 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { ExerciseForm } from '@/components/exercises/ExerciseForm';
+} from "@/components/ui/alert-dialog";
+import { ExerciseForm } from "@/components/exercises/ExerciseForm";
 
 interface ExerciseSelectorProps {
   onSelect: (exercise: Exercise) => void;
   placeholder?: string;
 }
 
-export function ExerciseSelector({ onSelect, placeholder = 'Search or create exercise...' }: ExerciseSelectorProps) {
+export function ExerciseSelector({
+  onSelect,
+  placeholder = "Search or create exercise...",
+}: ExerciseSelectorProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newExerciseName, setNewExerciseName] = useState('');
-  const [newExerciseDescription, setNewExerciseDescription] = useState('');
-  const [newExerciseBodyPart, setNewExerciseBodyPart] = useState('');
-  const [newExerciseWeightUnit, setNewExerciseWeightUnit] = useState<'kg' | 'lb'>('kg');
-  const [newExerciseSteps, setNewExerciseSteps] = useState('1');
-  const [newExerciseDefaultWeight, setNewExerciseDefaultWeight] = useState('0');
+  const [newExerciseName, setNewExerciseName] = useState("");
+  const [newExerciseDescription, setNewExerciseDescription] = useState("");
+  const [newExerciseBodyPart, setNewExerciseBodyPart] = useState("");
+  const [newExerciseWeightUnit, setNewExerciseWeightUnit] = useState<
+    "kg" | "lb"
+  >("kg");
+  const [newExerciseSteps, setNewExerciseSteps] = useState("1");
+  const [newExerciseDefaultWeight, setNewExerciseDefaultWeight] = useState("0");
 
   useEffect(() => {
     loadExercises();
@@ -40,20 +45,22 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
   };
 
   const filteredExercises = searchValue
-    ? exercises.filter((ex) => ex.name.toLowerCase().includes(searchValue.toLowerCase()))
+    ? exercises.filter((ex) =>
+        ex.name.toLowerCase().includes(searchValue.toLowerCase()),
+      )
     : exercises;
 
   const exactMatch = exercises.find(
-    (ex) => ex.name.toLowerCase() === searchValue.toLowerCase()
+    (ex) => ex.name.toLowerCase() === searchValue.toLowerCase(),
   );
 
   const handleOpenCreateForm = () => {
     setNewExerciseName(searchValue.trim());
-    setNewExerciseDescription('');
-    setNewExerciseBodyPart('');
-    setNewExerciseWeightUnit('kg');
-    setNewExerciseSteps('1');
-    setNewExerciseDefaultWeight('0');
+    setNewExerciseDescription("");
+    setNewExerciseBodyPart("");
+    setNewExerciseWeightUnit("kg");
+    setNewExerciseSteps("1");
+    setNewExerciseDefaultWeight("0");
     setShowCreateForm(true);
   };
 
@@ -62,13 +69,13 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
 
     const steps = parseFloat(newExerciseSteps);
     if (isNaN(steps) || steps <= 0) {
-      alert('Steps must be a positive number');
+      alert("Steps must be a positive number");
       return;
     }
 
     const defaultWeight = parseFloat(newExerciseDefaultWeight);
     if (isNaN(defaultWeight) || defaultWeight < 0) {
-      alert('Default weight must be a non-negative number');
+      alert("Default weight must be a non-negative number");
       return;
     }
 
@@ -83,16 +90,16 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
       });
       setExercises((prev) => [...prev, newExercise]);
       onSelect(newExercise);
-      setSearchValue('');
+      setSearchValue("");
       setShowCreateForm(false);
     } catch (error) {
-      console.error('Error creating exercise:', error);
+      console.error("Error creating exercise:", error);
     }
   };
 
   const handleSelectExercise = (exercise: Exercise) => {
     onSelect(exercise);
-    setSearchValue('');
+    setSearchValue("");
   };
 
   return (
@@ -133,7 +140,9 @@ export function ExerciseSelector({ onSelect, placeholder = 'Search or create exe
                           <span>•</span>
                         </>
                       )}
-                      <span>{exercise.weightUnit} / {exercise.steps} step</span>
+                      <span>
+                        {exercise.weightUnit} / {exercise.steps} step
+                      </span>
                     </div>
                   </div>
                 </Button>

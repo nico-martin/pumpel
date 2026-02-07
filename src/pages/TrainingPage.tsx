@@ -1,11 +1,11 @@
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { getActiveTraining } from '@/db/trainings';
-import { TrainingView } from '@/components/TrainingView';
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getActiveTraining } from "@/db/trainings";
+import { TrainingView } from "@/components/TrainingView";
 import {
   showTrainingNotification,
-  hasNotificationPermission
-} from '@/services/trainingNotifications';
+  hasNotificationPermission,
+} from "@/services/trainingNotifications";
 
 export function TrainingPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,17 +21,27 @@ export function TrainingPage() {
   // Check if app was opened from a notification
   useEffect(() => {
     const checkNotificationParam = async () => {
-      if (searchParams.get('from') === 'notification' && id) {
+      if (searchParams.get("from") === "notification" && id) {
         const activeTraining = await getActiveTraining();
 
         // Show notification immediately if this is the active training
-        if (activeTraining && activeTraining.id === id && hasNotificationPermission()) {
-          const elapsed = Math.floor((Date.now() - activeTraining.startTime) / 1000 / 60);
-          showTrainingNotification(activeTraining.id, activeTraining.startTime, elapsed);
+        if (
+          activeTraining &&
+          activeTraining.id === id &&
+          hasNotificationPermission()
+        ) {
+          const elapsed = Math.floor(
+            (Date.now() - activeTraining.startTime) / 1000 / 60,
+          );
+          showTrainingNotification(
+            activeTraining.id,
+            activeTraining.startTime,
+            elapsed,
+          );
         }
 
         // Clear the query parameter
-        searchParams.delete('from');
+        searchParams.delete("from");
         setSearchParams(searchParams, { replace: true });
       }
     };
@@ -44,18 +54,18 @@ export function TrainingPage() {
       const activeTraining = await getActiveTraining();
       setIsActive(activeTraining?.id === id);
     } catch (error) {
-      console.error('Error checking if training is active:', error);
+      console.error("Error checking if training is active:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleTrainingEnd = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const handleBack = () => {
-    navigate('/');
+    navigate("/");
   };
 
   if (loading) {
@@ -67,7 +77,7 @@ export function TrainingPage() {
   }
 
   if (!id) {
-    navigate('/');
+    navigate("/");
     return null;
   }
 

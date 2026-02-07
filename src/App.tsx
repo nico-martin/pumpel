@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { StartScreen } from '@/components/StartScreen';
-import { ExercisesPage } from '@/components/ExercisesPage';
-import { StatsPage } from '@/components/StatsPage';
-import { AccountPage } from '@/components/AccountPage';
-import { TrainingPage } from '@/pages/TrainingPage';
-import { TrainingTemplatesPage } from '@/components/TrainingTemplatesPage';
-import { Navigation } from '@/components/Navigation';
-import { NameSetupModal } from '@/components/NameSetupModal';
-import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt';
-import { getUser, saveUser } from '@/db/user';
+import { useState, useEffect } from "react";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { StartScreen } from "@/components/StartScreen";
+import { ExercisesPage } from "@/components/ExercisesPage";
+import { StatsPage } from "@/components/StatsPage";
+import { AccountPage } from "@/components/AccountPage";
+import { TrainingPage } from "@/pages/TrainingPage";
+import { TrainingTemplatesPage } from "@/components/TrainingTemplatesPage";
+import { Navigation } from "@/components/Navigation";
+import { NameSetupModal } from "@/components/NameSetupModal";
+import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
+import { getUser, saveUser } from "@/db/user";
 
 export function App() {
   const [showNameSetup, setShowNameSetup] = useState(false);
@@ -24,7 +24,7 @@ export function App() {
       const user = await getUser();
       setShowNameSetup(!user);
     } catch (error) {
-      console.error('Error checking user:', error);
+      console.error("Error checking user:", error);
       setShowNameSetup(true);
     } finally {
       setIsCheckingUser(false);
@@ -36,8 +36,8 @@ export function App() {
       await saveUser({ name });
       setShowNameSetup(false);
     } catch (error) {
-      console.error('Error saving user name:', error);
-      alert('Failed to save your name. Please try again.');
+      console.error("Error saving user name:", error);
+      alert("Failed to save your name. Please try again.");
     }
   };
 

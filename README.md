@@ -12,7 +12,7 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 > **This entire app was built using [Claude Code](https://claude.com/claude-code) and Claude 4.5 Sonnet, with zero manual code editing.**
 >
 > This project was an experiment to see how far I could push AI-assisted development without writing a single line of code myself. Every component, database schema, feature, and style was implemented through natural language conversations with Claude Code. The entire codebase, from initial setup to deployment configuration, was generated and modified purely through AI assistance.
-> 
+
 ## Features
 
 - **100% Local** - All data stored locally in your browser using IndexedDB
@@ -51,17 +51,20 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/nico-martin/pumpel.git
 cd pumpel
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -89,25 +92,30 @@ Pumpel uses IndexedDB with the following structure:
 ### Object Stores
 
 #### `user`
+
 - Single record storing user profile information
 - Fields: `id`, `name`, `createdAt`, `updatedAt`
 
 #### `exercises`
+
 - Stores exercise definitions
 - Fields: `id`, `name`, `description`, `type`, `bodyPart`, `createdAt`
 - Index: `name` (unique)
 
 #### `trainings`
+
 - Stores workout sessions
 - Fields: `id`, `name`, `warmUp`, `calmDown`, `startTime`, `endTime`, `notes`, `createdAt`
 - Indexes: `startTime`, `endTime`
 
 #### `sets`
+
 - Stores exercise sets within trainings
 - Fields: `id`, `trainingId`, `exerciseId`, `orderInTraining`, `restPeriod`, `notes`, `createdAt`
 - Indexes: `trainingId`, `exerciseId`, compound `exerciseId-trainingId`
 
 #### `rounds`
+
 - Stores individual rounds within sets
 - Fields: `id`, `setId`, `orderInSet`, `weight`, `reps`, `notes`, `createdAt`
 - Index: `setId`
@@ -207,12 +215,14 @@ npx shadcn@latest add <component-name>
 Pumpel is a Progressive Web App, which means you can:
 
 ### Install on Mobile (iOS/Android)
+
 1. Open Pumpel in your mobile browser
 2. Tap the share/menu button
 3. Select "Add to Home Screen"
 4. The app will appear on your home screen like a native app
 
 ### Install on Desktop
+
 1. Open Pumpel in Chrome/Edge
 2. Click the install icon in the address bar
 3. Click "Install" in the popup
@@ -229,12 +239,14 @@ Pumpel is a Progressive Web App, which means you can:
 ## Browser Compatibility
 
 Pumpel works in all modern browsers that support:
+
 - IndexedDB
 - Service Workers
 - ES2020+
 - CSS Grid & Flexbox
 
 Tested on:
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
@@ -249,4 +261,3 @@ Tested on:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-

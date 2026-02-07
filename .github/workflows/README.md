@@ -12,11 +12,11 @@ You need to configure the following secrets in your GitHub repository:
 
 ### Secrets to Add:
 
-| Secret Name | Description | Example |
-|-------------|-------------|---------|
-| `FTP_SERVER` | Your FTP server address | `ftp.example.com` or `192.168.1.100` |
-| `FTP_USERNAME` | FTP username | `myftpuser` |
-| `FTP_PASSWORD` | FTP password | `your-secure-password` |
+| Secret Name    | Description             | Example                              |
+| -------------- | ----------------------- | ------------------------------------ |
+| `FTP_SERVER`   | Your FTP server address | `ftp.example.com` or `192.168.1.100` |
+| `FTP_USERNAME` | FTP username            | `myftpuser`                          |
+| `FTP_PASSWORD` | FTP password            | `your-secure-password`               |
 
 ## Configuration Options
 

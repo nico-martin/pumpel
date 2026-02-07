@@ -2,8 +2,8 @@
 // This file provides a centralized access point for all database operations
 
 // Database initialization
-export { initDB, getDB, closeDB } from './init';
-export type { WorkoutTrackerDB } from './init';
+export { initDB, getDB, closeDB } from "./init";
+export type { WorkoutTrackerDB } from "./init";
 
 // Types
 export type {
@@ -19,7 +19,7 @@ export type {
   SetWithRounds,
   TrainingWithDetails,
   ExerciseHistory,
-} from './types';
+} from "./types";
 
 // Exercise operations
 export {
@@ -30,7 +30,7 @@ export {
   updateExercise,
   deleteExercise,
   exerciseNameExists,
-} from './exercises';
+} from "./exercises";
 
 // Training operations
 export {
@@ -41,7 +41,7 @@ export {
   getTrainingsByDateRange,
   updateTraining,
   deleteTraining,
-} from './trainings';
+} from "./trainings";
 
 // Set operations
 export {
@@ -53,7 +53,7 @@ export {
   updateSet,
   deleteSet,
   deleteSetsByTrainingId,
-} from './sets';
+} from "./sets";
 
 // Round operations
 export {
@@ -63,7 +63,7 @@ export {
   updateRound,
   deleteRound,
   deleteRoundsBySetId,
-} from './rounds';
+} from "./rounds";
 
 // Complex queries
 export {
@@ -71,8 +71,8 @@ export {
   getExerciseHistory,
   getLastUsedWeightForExercise,
   addCompleteTraining,
-} from './queries';
-export type { CompleteTrainingInput } from './queries';
+} from "./queries";
+export type { CompleteTrainingInput } from "./queries";
 
 // Utilities
-export { generateUUID, getCurrentTimestamp } from './utils';
+export { generateUUID, getCurrentTimestamp } from "./utils";

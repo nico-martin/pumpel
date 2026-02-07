@@ -1,34 +1,36 @@
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
+
+type WeightUnit = "kg" | "lb" | "seconds";
 
 const BODY_PARTS = [
-  'Chest',
-  'Back',
-  'Shoulders',
-  'Arms',
-  'Legs',
-  'Core',
-  'Cardio',
-  'Full Body',
+  "Chest",
+  "Back",
+  "Shoulders",
+  "Arms",
+  "Legs",
+  "Core",
+  "Cardio",
+  "Full Body",
 ];
 
 interface ExerciseFormProps {
   name: string;
   bodyPart: string;
-  weightUnit: 'kg' | 'lb';
+  weightUnit: WeightUnit;
   steps: string;
   defaultWeight: string;
   description: string;
   onNameChange: (value: string) => void;
   onBodyPartChange: (value: string) => void;
-  onWeightUnitChange: (value: 'kg' | 'lb') => void;
+  onWeightUnitChange: (value: WeightUnit) => void;
   onStepsChange: (value: string) => void;
   onDefaultWeightChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
@@ -85,13 +87,17 @@ export function ExerciseForm({
           <label className="text-xs font-medium text-foreground block mb-1 text-left">
             Weight Unit
           </label>
-          <Select value={weightUnit} onValueChange={(value: 'kg' | 'lb') => onWeightUnitChange(value)}>
+          <Select
+            value={weightUnit}
+            onValueChange={(value: WeightUnit) => onWeightUnitChange(value)}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="kg">kg</SelectItem>
               <SelectItem value="lb">lb</SelectItem>
+              <SelectItem value="seconds">seconds</SelectItem>
             </SelectContent>
           </Select>
         </div>

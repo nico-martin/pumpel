@@ -1,7 +1,7 @@
-import { getExercise } from './exercises';
-import { getTraining } from './trainings';
-import { getSetsByTrainingId, getSetsByExerciseId } from './sets';
-import { getRoundsBySetId } from './rounds';
+import { getExercise } from "./exercises";
+import { getTraining } from "./trainings";
+import { getSetsByTrainingId, getSetsByExerciseId } from "./sets";
+import { getRoundsBySetId } from "./rounds";
 import type {
   Training,
   Set,
@@ -13,13 +13,15 @@ import type {
   TrainingInput,
   SetInput,
   RoundInput,
-} from './types';
-import { createTraining } from './trainings';
-import { createSet } from './sets';
-import { createRound } from './rounds';
+} from "./types";
+import { createTraining } from "./trainings";
+import { createSet } from "./sets";
+import { createRound } from "./rounds";
 
 // Get a training with all its sets and rounds
-export async function getTrainingWithDetails(trainingId: string): Promise<TrainingWithDetails | null> {
+export async function getTrainingWithDetails(
+  trainingId: string,
+): Promise<TrainingWithDetails | null> {
   const training = await getTraining(trainingId);
   if (!training) {
     return null;
@@ -37,7 +39,7 @@ export async function getTrainingWithDetails(trainingId: string): Promise<Traini
         exercise: exercise!,
         rounds,
       };
-    })
+    }),
   );
 
   return {
@@ -47,7 +49,9 @@ export async function getTrainingWithDetails(trainingId: string): Promise<Traini
 }
 
 // Get exercise history with all trainings and sets
-export async function getExerciseHistory(exerciseId: string): Promise<ExerciseHistory | null> {
+export async function getExerciseHistory(
+  exerciseId: string,
+): Promise<ExerciseHistory | null> {
   const exercise = await getExercise(exerciseId);
   if (!exercise) {
     return null;
@@ -65,27 +69,29 @@ export async function getExerciseHistory(exerciseId: string): Promise<ExerciseHi
 
   // Get training details and rounds for each set
   const history = await Promise.all(
-    Array.from(trainingMap.entries()).map(async ([trainingId, trainingSets]) => {
-      const training = await getTraining(trainingId);
-      if (!training) {
-        return null;
-      }
+    Array.from(trainingMap.entries()).map(
+      async ([trainingId, trainingSets]) => {
+        const training = await getTraining(trainingId);
+        if (!training) {
+          return null;
+        }
 
-      const setsWithRounds = await Promise.all(
-        trainingSets.map(async (set) => {
-          const rounds = await getRoundsBySetId(set.id);
-          return {
-            ...set,
-            rounds,
-          };
-        })
-      );
+        const setsWithRounds = await Promise.all(
+          trainingSets.map(async (set) => {
+            const rounds = await getRoundsBySetId(set.id);
+            return {
+              ...set,
+              rounds,
+            };
+          }),
+        );
 
-      return {
-        training,
-        sets: setsWithRounds,
-      };
-    })
+        return {
+          training,
+          sets: setsWithRounds,
+        };
+      },
+    ),
   );
 
   // Filter out null entries and sort by training start time (most recent first)
@@ -104,7 +110,7 @@ export async function getExerciseHistory(exerciseId: string): Promise<ExerciseHi
 // Get the last used weight and reps for a specific exercise
 export async function getLastUsedWeightForExercise(
   exerciseId: string,
-  excludeTrainingId?: string
+  excludeTrainingId?: string,
 ): Promise<{ weight: number; reps: number; date: number } | null> {
   const exerciseHistory = await getExerciseHistory(exerciseId);
   if (!exerciseHistory || exerciseHistory.history.length === 0) {
@@ -143,7 +149,7 @@ export async function getLastUsedWeightForExercise(
 // Get the entire last set (all rounds) for a specific exercise
 export async function getLastSetForExercise(
   exerciseId: string,
-  excludeTrainingId?: string
+  excludeTrainingId?: string,
 ): Promise<{ rounds: Round[]; date: number } | null> {
   const exerciseHistory = await getExerciseHistory(exerciseId);
   if (!exerciseHistory || exerciseHistory.history.length === 0) {
@@ -193,7 +199,9 @@ export interface CompleteTrainingInput {
   }[];
 }
 
-export async function addCompleteTraining(input: CompleteTrainingInput): Promise<TrainingWithDetails> {
+export async function addCompleteTraining(
+  input: CompleteTrainingInput,
+): Promise<TrainingWithDetails> {
   // Create the training
   const training = await createTraining(input.training);
 

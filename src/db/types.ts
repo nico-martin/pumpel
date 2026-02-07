@@ -4,9 +4,9 @@ export interface Exercise {
   id: string; // UUID
   name: string;
   description?: string;
-  type?: 'strength' | 'cardio' | 'flexibility' | string;
+  type?: "strength" | "cardio" | "flexibility" | string;
   bodyPart?: string; // e.g., "Chest", "Back", "Legs", etc.
-  weightUnit: 'kg' | 'lb'; // Default: 'kg'
+  weightUnit: "kg" | "lb"; // Default: 'kg'
   steps: number; // Default: 1
   defaultWeight?: number; // Default weight when adding new rounds
   createdAt: number; // Unix timestamp
@@ -44,14 +44,17 @@ export interface Round {
 }
 
 // Input types (without generated fields)
-export type ExerciseInput = Omit<Exercise, 'id' | 'createdAt' | 'weightUnit' | 'steps' | 'defaultWeight'> & {
-  weightUnit?: 'kg' | 'lb';
+export type ExerciseInput = Omit<
+  Exercise,
+  "id" | "createdAt" | "weightUnit" | "steps" | "defaultWeight"
+> & {
+  weightUnit?: "kg" | "lb";
   steps?: number;
   defaultWeight?: number;
 };
-export type TrainingInput = Omit<Training, 'id' | 'createdAt'>;
-export type SetInput = Omit<Set, 'id' | 'createdAt'>;
-export type RoundInput = Omit<Round, 'id' | 'createdAt'>;
+export type TrainingInput = Omit<Training, "id" | "createdAt">;
+export type SetInput = Omit<Set, "id" | "createdAt">;
+export type RoundInput = Omit<Round, "id" | "createdAt">;
 
 // Extended types for queries with joined data
 export interface SetWithExercise extends Set {
@@ -82,7 +85,7 @@ export interface User {
 }
 
 // Input types for user
-export type UserInput = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+export type UserInput = Omit<User, "id" | "createdAt" | "updatedAt">;
 
 // Training Templates
 export interface TrainingTemplate {
@@ -95,4 +98,7 @@ export interface TrainingTemplate {
 }
 
 // Input type for training template
-export type TrainingTemplateInput = Omit<TrainingTemplate, 'id' | 'createdAt' | 'updatedAt'>;
+export type TrainingTemplateInput = Omit<
+  TrainingTemplate,
+  "id" | "createdAt" | "updatedAt"
+>;

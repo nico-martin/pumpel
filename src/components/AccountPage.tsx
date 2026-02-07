@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getDB } from '@/db/init';
-import { getAllExercises } from '@/db/exercises';
-import { getAllTrainings } from '@/db/trainings';
-import { getAllSets } from '@/db/sets';
-import { getAllRounds } from '@/db/rounds';
-import { getUser, updateUserName } from '@/db/user';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getDB } from "@/db/init";
+import { getAllExercises } from "@/db/exercises";
+import { getAllTrainings } from "@/db/trainings";
+import { getAllSets } from "@/db/sets";
+import { getAllRounds } from "@/db/rounds";
+import { getUser, updateUserName } from "@/db/user";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,16 +19,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Sun, Moon, Monitor, ChevronLeft } from 'lucide-react';
+} from "@/components/ui/alert-dialog";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Sun, Moon, Monitor, ChevronLeft } from "lucide-react";
 
 export function AccountPage() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [editingName, setEditingName] = useState(false);
-  const [newName, setNewName] = useState('');
+  const [newName, setNewName] = useState("");
   const [dbInfo, setDbInfo] = useState<{
     createdAt: number | null;
     exerciseCount: number;
@@ -74,7 +74,8 @@ export function AccountPage() {
         ...rounds.map((r) => r.createdAt),
       ];
 
-      const earliestTimestamp = allTimestamps.length > 0 ? Math.min(...allTimestamps) : null;
+      const earliestTimestamp =
+        allTimestamps.length > 0 ? Math.min(...allTimestamps) : null;
 
       setDbInfo({
         createdAt: earliestTimestamp,
@@ -84,7 +85,7 @@ export function AccountPage() {
         roundCount: rounds.length,
       });
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
@@ -98,7 +99,7 @@ export function AccountPage() {
   const handleSaveName = async () => {
     const trimmedName = newName.trim();
     if (!trimmedName) {
-      alert('Name cannot be empty.');
+      alert("Name cannot be empty.");
       return;
     }
 
@@ -107,14 +108,14 @@ export function AccountPage() {
       setUserName(trimmedName);
       setEditingName(false);
     } catch (error) {
-      console.error('Error updating name:', error);
-      alert('Failed to update name. Please try again.');
+      console.error("Error updating name:", error);
+      alert("Failed to update name. Please try again.");
     }
   };
 
   const handleCancelEdit = () => {
     setEditingName(false);
-    setNewName('');
+    setNewName("");
   };
 
   const handleExport = async () => {
@@ -140,26 +141,26 @@ export function AccountPage() {
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json',
+        type: "application/json",
       });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `pumpel-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `pumpel-backup-${new Date().toISOString().split("T")[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error exporting data:', error);
-      alert('Error exporting data. Please try again.');
+      console.error("Error exporting data:", error);
+      alert("Error exporting data. Please try again.");
     }
   };
 
   const handleImportClick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
@@ -178,35 +179,38 @@ export function AccountPage() {
       const importData = JSON.parse(text);
 
       if (!importData.version || !importData.data) {
-        alert('Invalid backup file format.');
+        alert("Invalid backup file format.");
         return;
       }
 
       const db = await getDB();
-      const tx = db.transaction(['user', 'exercises', 'trainings', 'sets', 'rounds'], 'readwrite');
+      const tx = db.transaction(
+        ["user", "exercises", "trainings", "sets", "rounds"],
+        "readwrite",
+      );
 
       // Clear existing data
       await Promise.all([
-        tx.objectStore('user').clear(),
-        tx.objectStore('exercises').clear(),
-        tx.objectStore('trainings').clear(),
-        tx.objectStore('sets').clear(),
-        tx.objectStore('rounds').clear(),
+        tx.objectStore("user").clear(),
+        tx.objectStore("exercises").clear(),
+        tx.objectStore("trainings").clear(),
+        tx.objectStore("sets").clear(),
+        tx.objectStore("rounds").clear(),
       ]);
 
       // Import new data
       const { user, exercises, trainings, sets, rounds } = importData.data;
 
       const promises = [
-        ...exercises.map((e: any) => tx.objectStore('exercises').add(e)),
-        ...trainings.map((t: any) => tx.objectStore('trainings').add(t)),
-        ...sets.map((s: any) => tx.objectStore('sets').add(s)),
-        ...rounds.map((r: any) => tx.objectStore('rounds').add(r)),
+        ...exercises.map((e: any) => tx.objectStore("exercises").add(e)),
+        ...trainings.map((t: any) => tx.objectStore("trainings").add(t)),
+        ...sets.map((s: any) => tx.objectStore("sets").add(s)),
+        ...rounds.map((r: any) => tx.objectStore("rounds").add(r)),
       ];
 
       // Add user if present in backup
       if (user) {
-        promises.push(tx.objectStore('user').add(user));
+        promises.push(tx.objectStore("user").add(user));
       }
 
       await Promise.all(promises);
@@ -216,40 +220,43 @@ export function AccountPage() {
       setShowImportConfirm(false);
       setImportFile(null);
       await loadData();
-      alert('Data imported successfully!');
+      alert("Data imported successfully!");
     } catch (error) {
-      console.error('Error importing data:', error);
-      alert('Error importing data. Please check the file and try again.');
+      console.error("Error importing data:", error);
+      alert("Error importing data. Please check the file and try again.");
     }
   };
 
   const handleDeleteAll = async () => {
     try {
       const db = await getDB();
-      const tx = db.transaction(['exercises', 'trainings', 'sets', 'rounds'], 'readwrite');
+      const tx = db.transaction(
+        ["exercises", "trainings", "sets", "rounds"],
+        "readwrite",
+      );
 
       await Promise.all([
-        tx.objectStore('exercises').clear(),
-        tx.objectStore('trainings').clear(),
-        tx.objectStore('sets').clear(),
-        tx.objectStore('rounds').clear(),
+        tx.objectStore("exercises").clear(),
+        tx.objectStore("trainings").clear(),
+        tx.objectStore("sets").clear(),
+        tx.objectStore("rounds").clear(),
       ]);
 
       await tx.done;
 
       setShowDeleteConfirm(false);
       await loadData();
-      alert('All data deleted successfully!');
+      alert("All data deleted successfully!");
     } catch (error) {
-      console.error('Error deleting data:', error);
-      alert('Error deleting data. Please try again.');
+      console.error("Error deleting data:", error);
+      alert("Error deleting data. Please try again.");
     }
   };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
@@ -268,7 +275,7 @@ export function AccountPage() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="shrink-0"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -292,9 +299,9 @@ export function AccountPage() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && newName.trim()) {
+                    if (e.key === "Enter" && newName.trim()) {
                       handleSaveName();
-                    } else if (e.key === 'Escape') {
+                    } else if (e.key === "Escape") {
                       handleCancelEdit();
                     }
                   }}
@@ -302,10 +309,18 @@ export function AccountPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleSaveName} disabled={!newName.trim()} className="flex-1">
+                <Button
+                  onClick={handleSaveName}
+                  disabled={!newName.trim()}
+                  className="flex-1"
+                >
                   Save
                 </Button>
-                <Button onClick={handleCancelEdit} variant="outline" className="flex-1">
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="outline"
+                  className="flex-1"
+                >
                   Cancel
                 </Button>
               </div>
@@ -334,24 +349,24 @@ export function AccountPage() {
             <Label>Theme</Label>
             <div className="grid grid-cols-3 gap-2">
               <Button
-                variant={theme === 'light' ? 'default' : 'outline'}
-                onClick={() => setTheme('light')}
+                variant={theme === "light" ? "default" : "outline"}
+                onClick={() => setTheme("light")}
                 className="flex items-center justify-center gap-2"
               >
                 <Sun className="size-4" />
                 <span>Light</span>
               </Button>
               <Button
-                variant={theme === 'dark' ? 'default' : 'outline'}
-                onClick={() => setTheme('dark')}
+                variant={theme === "dark" ? "default" : "outline"}
+                onClick={() => setTheme("dark")}
                 className="flex items-center justify-center gap-2"
               >
                 <Moon className="size-4" />
                 <span>Dark</span>
               </Button>
               <Button
-                variant={theme === 'system' ? 'default' : 'outline'}
-                onClick={() => setTheme('system')}
+                variant={theme === "system" ? "default" : "outline"}
+                onClick={() => setTheme("system")}
                 className="flex items-center justify-center gap-2"
               >
                 <Monitor className="size-4" />
@@ -370,23 +385,24 @@ export function AccountPage() {
         <CardContent>
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>
-              <strong className="text-foreground">100% Local</strong> - All your data is stored
-              locally in your browser using IndexedDB.
+              <strong className="text-foreground">100% Local</strong> - All your
+              data is stored locally in your browser using IndexedDB.
             </p>
             <p>
-              <strong className="text-foreground">No Cloud</strong> - Your workout data never
-              leaves your device.
+              <strong className="text-foreground">No Cloud</strong> - Your
+              workout data never leaves your device.
             </p>
             <p>
-              <strong className="text-foreground">No Server</strong> - This app runs entirely in
-              your browser.
+              <strong className="text-foreground">No Server</strong> - This app
+              runs entirely in your browser.
             </p>
             <p>
-              <strong className="text-foreground">No Cost</strong> - Free forever, no subscriptions
-              or hidden fees.
+              <strong className="text-foreground">No Cost</strong> - Free
+              forever, no subscriptions or hidden fees.
             </p>
             <p>
-              <strong className="text-foreground">Open Source</strong> - Available on{' '}
+              <strong className="text-foreground">Open Source</strong> -
+              Available on{" "}
               <a
                 href="https://github.com/nico-martin/pumpel"
                 target="_blank"
@@ -394,7 +410,7 @@ export function AccountPage() {
                 className="text-primary hover:underline"
               >
                 GitHub
-              </a>{' '}
+              </a>{" "}
               under MIT license.
             </p>
           </div>
@@ -411,7 +427,9 @@ export function AccountPage() {
             {dbInfo.createdAt && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">First Data Entry</span>
-                <span className="font-medium">{formatDate(dbInfo.createdAt)}</span>
+                <span className="font-medium">
+                  {formatDate(dbInfo.createdAt)}
+                </span>
               </div>
             )}
             <div className="flex justify-between text-sm">
@@ -444,7 +462,11 @@ export function AccountPage() {
             <Button variant="outline" className="w-full" onClick={handleExport}>
               Export Database
             </Button>
-            <Button variant="outline" className="w-full" onClick={handleImportClick}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleImportClick}
+            >
               Import Database
             </Button>
             <Button
@@ -464,13 +486,18 @@ export function AccountPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Import Database</AlertDialogTitle>
             <AlertDialogDescription>
-              This will replace all existing data with the data from the backup file. This action
-              cannot be undone. Make sure you have a backup of your current data before proceeding.
+              This will replace all existing data with the data from the backup
+              file. This action cannot be undone. Make sure you have a backup of
+              your current data before proceeding.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setImportFile(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleImportConfirm}>Import</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setImportFile(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleImportConfirm}>
+              Import
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -481,8 +508,9 @@ export function AccountPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete All Data</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete all data? This will permanently remove all exercises,
-              trainings, sets, and rounds. This action cannot be undone.
+              Are you sure you want to delete all data? This will permanently
+              remove all exercises, trainings, sets, and rounds. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
