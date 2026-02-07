@@ -15,6 +15,8 @@ const BODY_PARTS = [
   "Back",
   "Shoulders",
   "Arms",
+  "Biceps",
+  "Triceps",
   "Legs",
   "Core",
   "Cardio",
