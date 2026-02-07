@@ -22,7 +22,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Trash2, Edit, ChevronLeft, Plus } from "lucide-react";
-import { ExerciseForm } from "@/components/exercises/ExerciseForm";
+import {
+  ExerciseForm,
+  type WeightUnit,
+} from "@/components/exercises/ExerciseForm";
 
 export function ExercisesPage() {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ export function ExercisesPage() {
   const [editName, setEditName] = useState("");
   const [editBodyPart, setEditBodyPart] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [editWeightUnit, setEditWeightUnit] = useState<"kg" | "lb">("kg");
+  const [editWeightUnit, setEditWeightUnit] = useState<WeightUnit>("kg");
   const [editSteps, setEditSteps] = useState("1");
   const [editDefaultWeight, setEditDefaultWeight] = useState("0");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);

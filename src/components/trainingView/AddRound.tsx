@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import type { WeightUnit } from "@/components/exercises/ExerciseForm.tsx";
 
 interface CurrentRound {
   weight: string;
@@ -32,7 +33,7 @@ interface AddRoundProps {
   exerciseName: string;
   exerciseId: string;
   trainingId: string;
-  weightUnit: "kg" | "lb";
+  weightUnit: WeightUnit;
   steps: number;
   currentRound: CurrentRound;
   onRoundChange: (field: keyof CurrentRound, value: string) => void;
@@ -103,7 +104,7 @@ export function AddRound({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">
-            Weight ({weightUnit})
+            Unit ({weightUnit})
           </label>
           <div className="flex">
             <Button

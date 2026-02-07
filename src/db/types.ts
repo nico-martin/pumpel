@@ -1,12 +1,14 @@
 // Type definitions for the workout tracker database
 
+import type { WeightUnit } from "@/components/exercises/ExerciseForm.tsx";
+
 export interface Exercise {
   id: string; // UUID
   name: string;
   description?: string;
   type?: "strength" | "cardio" | "flexibility" | string;
   bodyPart?: string; // e.g., "Chest", "Back", "Legs", etc.
-  weightUnit: "kg" | "lb"; // Default: 'kg'
+  weightUnit: WeightUnit; // Default: 'kg'
   steps: number; // Default: 1
   defaultWeight?: number; // Default weight when adding new rounds
   createdAt: number; // Unix timestamp
@@ -48,7 +50,7 @@ export type ExerciseInput = Omit<
   Exercise,
   "id" | "createdAt" | "weightUnit" | "steps" | "defaultWeight"
 > & {
-  weightUnit?: "kg" | "lb";
+  weightUnit?: WeightUnit;
   steps?: number;
   defaultWeight?: number;
 };

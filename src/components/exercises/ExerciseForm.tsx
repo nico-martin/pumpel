@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type WeightUnit = "kg" | "lb" | "seconds";
+export type WeightUnit = "kg" | "lb" | "seconds";
 
 const BODY_PARTS = [
   "Chest",
@@ -85,7 +85,7 @@ export function ExerciseForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="text-xs font-medium text-foreground block mb-1 text-left">
-            Weight Unit
+            Exercise Unit
           </label>
           <Select
             value={weightUnit}

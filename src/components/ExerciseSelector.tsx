@@ -12,7 +12,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ExerciseForm } from "@/components/exercises/ExerciseForm";
+import {
+  ExerciseForm,
+  type WeightUnit,
+} from "@/components/exercises/ExerciseForm";
 
 interface ExerciseSelectorProps {
   onSelect: (exercise: Exercise) => void;
@@ -29,9 +32,8 @@ export function ExerciseSelector({
   const [newExerciseName, setNewExerciseName] = useState("");
   const [newExerciseDescription, setNewExerciseDescription] = useState("");
   const [newExerciseBodyPart, setNewExerciseBodyPart] = useState("");
-  const [newExerciseWeightUnit, setNewExerciseWeightUnit] = useState<
-    "kg" | "lb"
-  >("kg");
+  const [newExerciseWeightUnit, setNewExerciseWeightUnit] =
+    useState<WeightUnit>("kg");
   const [newExerciseSteps, setNewExerciseSteps] = useState("1");
   const [newExerciseDefaultWeight, setNewExerciseDefaultWeight] = useState("0");
 
