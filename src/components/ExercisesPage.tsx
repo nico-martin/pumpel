@@ -179,6 +179,27 @@ export function ExercisesPage() {
     }
   };
 
+  // Group exercises by body part
+  const groupedExercises = exercises.reduce(
+    (acc, exercise) => {
+      const bodyPart = exercise.bodyPart || "Uncategorized";
+      if (!acc[bodyPart]) {
+        acc[bodyPart] = [];
+      }
+      acc[bodyPart].push(exercise);
+      return acc;
+    },
+    {} as Record<string, Exercise[]>,
+  );
+
+  // Sort body part groups
+  const sortedBodyParts = Object.keys(groupedExercises).sort((a, b) => {
+    // Put "Uncategorized" at the end
+    if (a === "Uncategorized") return 1;
+    if (b === "Uncategorized") return -1;
+    return a.localeCompare(b);
+  });
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -214,51 +235,54 @@ export function ExercisesPage() {
           No exercises yet. Click the button above to create your first one!
         </p>
       ) : (
-        <div className="space-y-3">
-          {exercises.map((exercise) => (
-            <Card key={exercise.id} size="sm">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex flex-col items-start gap-0.5">
-                    <span>{exercise.name}</span>
-                    <div className="flex gap-2 text-xs text-muted-foreground font-normal">
-                      {exercise.bodyPart && (
-                        <>
-                          <span>{exercise.bodyPart}</span>
-                          <span>•</span>
-                        </>
-                      )}
-                      <span>
-                        {exercise.weightUnit} / {exercise.steps} step
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      onClick={() => handleEditClick(exercise)}
-                    >
-                      <Edit className="size-4" />
-                    </Button>
-                    <Button
-                      size="icon-xs"
-                      variant="destructive"
-                      onClick={() => handleDeleteClick(exercise.id)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              {exercise.description && (
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">
-                    {exercise.description}
-                  </p>
-                </CardContent>
-              )}
-            </Card>
+        <div className="space-y-6">
+          {sortedBodyParts.map((bodyPart) => (
+            <div key={bodyPart}>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
+                {bodyPart}
+              </h2>
+              <div className="space-y-3">
+                {groupedExercises[bodyPart].map((exercise) => (
+                  <Card key={exercise.id} size="sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex flex-col items-start gap-0.5">
+                          <span>{exercise.name}</span>
+                          <div className="flex gap-2 text-xs text-muted-foreground font-normal">
+                            <span>
+                              {exercise.weightUnit} / {exercise.steps} step
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon-xs"
+                            variant="ghost"
+                            onClick={() => handleEditClick(exercise)}
+                          >
+                            <Edit className="size-4" />
+                          </Button>
+                          <Button
+                            size="icon-xs"
+                            variant="destructive"
+                            onClick={() => handleDeleteClick(exercise.id)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    {exercise.description && (
+                      <CardContent>
+                        <p className="text-xs text-muted-foreground">
+                          {exercise.description}
+                        </p>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
