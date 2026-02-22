@@ -27,6 +27,7 @@ export function TextareaWithSuggestions({
     left: 0,
     width: 0,
   });
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,12 +37,12 @@ export function TextareaWithSuggestions({
         suggestion.toLowerCase().includes(value.toLowerCase()),
       );
       setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
+      setShowSuggestions(filtered.length > 0 && isFocused);
     } else {
       setFilteredSuggestions(suggestions);
-      setShowSuggestions(false);
+      setShowSuggestions(isFocused && suggestions.length > 0);
     }
-  }, [value, suggestions]);
+  }, [value, suggestions, isFocused]);
 
   useEffect(() => {
     if (showSuggestions && containerRef.current) {
@@ -55,15 +56,13 @@ export function TextareaWithSuggestions({
   }, [showSuggestions]);
 
   const handleFocus = () => {
-    if (suggestions.length > 0) {
-      setFilteredSuggestions(suggestions);
-      setShowSuggestions(true);
-    }
+    setIsFocused(true);
   };
 
   const handleBlur = () => {
     // Delay to allow click on suggestion
     setTimeout(() => {
+      setIsFocused(false);
       setShowSuggestions(false);
     }, 200);
   };

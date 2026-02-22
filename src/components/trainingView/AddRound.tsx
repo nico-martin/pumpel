@@ -216,7 +216,7 @@ export function AddRound({
             <AlertDialogContent>
               <AlertDialogHeader>
                 {exerciseDescription && (
-                  <div className="mb-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                  <div className="mb-3 text-sm text-left text-muted-foreground whitespace-pre-wrap">
                     {exerciseDescription}
                   </div>
                 )}
