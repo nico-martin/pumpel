@@ -136,11 +136,12 @@ export function TrainingView({
         setCurrentRound((prev) => ({
           ...prev,
           weight: lastRound.weight.toString(),
+          reps: lastRound.reps.toString(),
         }));
         return;
       }
 
-      // Otherwise, get weight from previous trainings
+      // Otherwise, get weight and reps from previous trainings
       const data = await getLastUsedWeightForExercise(
         currentSet.exerciseId,
         trainingId,
@@ -149,6 +150,7 @@ export function TrainingView({
         setCurrentRound((prev) => ({
           ...prev,
           weight: data.weight.toString(),
+          reps: data.reps.toString(),
         }));
       } else {
         // No history for this exercise, use defaultWeight or clear
@@ -157,6 +159,7 @@ export function TrainingView({
           ...prev,
           weight:
             defaultWeight && defaultWeight > 0 ? defaultWeight.toString() : "",
+          reps: "9",
         }));
       }
     } catch (error) {
@@ -208,10 +211,10 @@ export function TrainingView({
         notes: currentRound.notes || undefined,
       });
 
-      // Reset to defaults, keeping the same weight
+      // Reset to defaults, keeping the same weight and reps
       setCurrentRound((prev) => ({
         weight: prev.weight,
-        reps: "9",
+        reps: prev.reps,
         notes: "",
       }));
       await loadTraining();
@@ -646,6 +649,7 @@ export function TrainingView({
                   onAddRound={handleAddRound}
                   onStartNewSet={handleStartNewSet}
                   inline={true}
+                  exerciseDescription={set.exercise.description}
                 />
               )}
             </CardContent>

@@ -40,6 +40,7 @@ interface AddRoundProps {
   onAddRound: () => void;
   onStartNewSet: () => void;
   inline?: boolean;
+  exerciseDescription?: string;
 }
 
 export function AddRound({
@@ -53,6 +54,7 @@ export function AddRound({
   onAddRound,
   onStartNewSet,
   inline = false,
+  exerciseDescription,
 }: AddRoundProps) {
   const [showLastUsed, setShowLastUsed] = useState(false);
   const [lastSetData, setLastSetData] = useState<LastSetData | null>(null);
@@ -213,6 +215,11 @@ export function AddRound({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
+                {exerciseDescription && (
+                  <div className="mb-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                    {exerciseDescription}
+                  </div>
+                )}
                 <AlertDialogTitle>Last Set</AlertDialogTitle>
                 <AlertDialogDescription>
                   {lastSetData ? (
@@ -277,6 +284,11 @@ export function AddRound({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
+                {exerciseDescription && (
+                  <div className="mb-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                    {exerciseDescription}
+                  </div>
+                )}
                 <AlertDialogTitle>Last Set</AlertDialogTitle>
                 <AlertDialogDescription>
                   {lastSetData ? (
