@@ -76,12 +76,13 @@ export function TextareaWithSuggestions({
   const suggestionDropdown = showSuggestions &&
     filteredSuggestions.length > 0 && (
       <div
-        className="fixed z-50 bg-background border rounded-md shadow-lg max-h-48 overflow-y-auto"
+        className="fixed z-[9999] bg-background border rounded-md shadow-lg max-h-48 overflow-y-auto"
         style={{
           top: `${dropdownPosition.top}px`,
           left: `${dropdownPosition.left}px`,
           width: `${dropdownPosition.width}px`,
         }}
+        onMouseDown={(e) => e.preventDefault()}
       >
         <div className="p-1">
           {filteredSuggestions.slice(0, 5).map((suggestion, index) => (
