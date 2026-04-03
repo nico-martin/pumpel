@@ -45,14 +45,27 @@ export function TextareaWithSuggestions({
   }, [value, suggestions, isFocused]);
 
   useEffect(() => {
-    if (showSuggestions && containerRef.current) {
+    if (!showSuggestions) return;
+
+    const updateDropdownPosition = () => {
+      if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: rect.bottom,
+        left: rect.left,
         width: rect.width,
       });
-    }
+    };
+
+    updateDropdownPosition();
+
+    window.addEventListener("resize", updateDropdownPosition);
+    window.addEventListener("scroll", updateDropdownPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updateDropdownPosition);
+      window.removeEventListener("scroll", updateDropdownPosition, true);
+    };
   }, [showSuggestions]);
 
   const handleFocus = () => {
