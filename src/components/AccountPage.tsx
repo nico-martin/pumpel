@@ -5,6 +5,7 @@ import { getAllExercises } from "@/db/exercises";
 import { getAllTrainings } from "@/db/trainings";
 import { getAllSets } from "@/db/sets";
 import { getAllRounds } from "@/db/rounds";
+import { getAllTrainingTemplates } from "@/db/trainingTemplates";
 import { getUser, updateUserName } from "@/db/user";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,13 +55,15 @@ export function AccountPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [user, exercises, trainings, sets, rounds] = await Promise.all([
-        getUser(),
-        getAllExercises(),
-        getAllTrainings(),
-        getAllSets(),
-        getAllRounds(),
-      ]);
+      const [user, exercises, trainings, sets, rounds, trainingTemplates] =
+        await Promise.all([
+          getUser(),
+          getAllExercises(),
+          getAllTrainings(),
+          getAllSets(),
+          getAllRounds(),
+          getAllTrainingTemplates(),
+        ]);
 
       if (user) {
         setUserName(user.name);
@@ -72,6 +75,7 @@ export function AccountPage() {
         ...trainings.map((t) => t.createdAt),
         ...sets.map((s) => s.createdAt),
         ...rounds.map((r) => r.createdAt),
+        ...trainingTemplates.map((template) => template.createdAt),
       ];
 
       const earliestTimestamp =
@@ -120,13 +124,15 @@ export function AccountPage() {
 
   const handleExport = async () => {
     try {
-      const [user, exercises, trainings, sets, rounds] = await Promise.all([
-        getUser(),
-        getAllExercises(),
-        getAllTrainings(),
-        getAllSets(),
-        getAllRounds(),
-      ]);
+      const [user, exercises, trainings, sets, rounds, trainingTemplates] =
+        await Promise.all([
+          getUser(),
+          getAllExercises(),
+          getAllTrainings(),
+          getAllSets(),
+          getAllRounds(),
+          getAllTrainingTemplates(),
+        ]);
 
       const exportData = {
         version: 2,
@@ -137,6 +143,7 @@ export function AccountPage() {
           trainings,
           sets,
           rounds,
+          trainingTemplates,
         },
       };
 
@@ -185,7 +192,14 @@ export function AccountPage() {
 
       const db = await getDB();
       const tx = db.transaction(
-        ["user", "exercises", "trainings", "sets", "rounds"],
+        [
+          "user",
+          "exercises",
+          "trainings",
+          "sets",
+          "rounds",
+          "trainingTemplates",
+        ],
         "readwrite",
       );
 
@@ -196,16 +210,27 @@ export function AccountPage() {
         tx.objectStore("trainings").clear(),
         tx.objectStore("sets").clear(),
         tx.objectStore("rounds").clear(),
+        tx.objectStore("trainingTemplates").clear(),
       ]);
 
       // Import new data
-      const { user, exercises, trainings, sets, rounds } = importData.data;
+      const {
+        user,
+        exercises = [],
+        trainings = [],
+        sets = [],
+        rounds = [],
+        trainingTemplates = [],
+      } = importData.data;
 
       const promises = [
         ...exercises.map((e: any) => tx.objectStore("exercises").add(e)),
         ...trainings.map((t: any) => tx.objectStore("trainings").add(t)),
         ...sets.map((s: any) => tx.objectStore("sets").add(s)),
         ...rounds.map((r: any) => tx.objectStore("rounds").add(r)),
+        ...trainingTemplates.map((template: any) =>
+          tx.objectStore("trainingTemplates").add(template),
+        ),
       ];
 
       // Add user if present in backup
