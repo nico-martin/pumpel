@@ -41,7 +41,8 @@ You can also trigger the deployment manually:
 ## How It Works
 
 1. Checks out the code
-2. Sets up Node.js 20
-3. Installs dependencies with `npm ci`
-4. Builds the project with `npm run build`
-5. Uploads the `dist/` folder to your FTP server
+2. Sets up the pnpm version declared in `package.json`
+3. Sets up Node.js 20 with pnpm caching
+4. Installs dependencies with `pnpm install --frozen-lockfile`
+5. Builds the project with `pnpm build`
+6. Uploads the `dist/` folder to your FTP server

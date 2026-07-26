@@ -46,11 +46,13 @@ export {
 // Set operations
 export {
   createSet,
+  createSetAt,
   getSet,
   getSetsByTrainingId,
   getSetsByExerciseId,
   getSetsByExerciseAndTraining,
   updateSet,
+  moveSet,
   deleteSet,
   deleteSetsByTrainingId,
 } from "./sets";

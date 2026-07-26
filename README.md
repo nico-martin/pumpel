@@ -46,7 +46,7 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 ### Prerequisites
 
 - Node.js 20 or higher
-- npm
+- pnpm 11
 
 ### Installation
 
@@ -60,13 +60,13 @@ cd pumpel
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Start the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 4. Open your browser and navigate to `http://localhost:5000`
@@ -74,7 +74,7 @@ npm run dev
 ### Build for Production
 
 ```bash
-npm run build
+pnpm build
 ```
 
 The built files will be in the `dist/` directory.
@@ -82,7 +82,7 @@ The built files will be in the `dist/` directory.
 ### Preview Production Build
 
 ```bash
-npm run preview
+pnpm preview
 ```
 
 ## Database Structure
@@ -179,14 +179,14 @@ pumpel/
 ### Code Style
 
 - ESLint is configured for code quality
-- Run linting: `npm run lint`
+- Run linting: `pnpm lint`
 
 ### Adding UI Components
 
 This project uses shadcn/ui components. To add new components:
 
 ```bash
-npx shadcn@latest add <component-name>
+pnpm dlx shadcn@latest add <component-name>
 ```
 
 ## Data Management

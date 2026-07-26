@@ -14,6 +14,59 @@ export async function createSet(input: SetInput): Promise<Set> {
   return set;
 }
 
+export async function createSetAt(
+  input: Omit<SetInput, "orderInTraining">,
+  index: number,
+): Promise<Set> {
+  const db = await getDB();
+  const tx = db.transaction("sets", "readwrite");
+  const sets = await tx.store.index("trainingId").getAll(input.trainingId);
+  sets.sort((a, b) => a.orderInTraining - b.orderInTraining);
+
+  const set: Set = {
+    ...input,
+    id: generateUUID(),
+    orderInTraining: Math.max(0, Math.min(index, sets.length)),
+    createdAt: getCurrentTimestamp(),
+  };
+  sets.splice(set.orderInTraining, 0, set);
+
+  await Promise.all(
+    sets.map((item, orderInTraining) =>
+      tx.store.put({ ...item, orderInTraining }),
+    ),
+  );
+  await tx.done;
+  return set;
+}
+
+export async function moveSet(
+  trainingId: string,
+  setId: string,
+  targetIndex: number,
+): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction("sets", "readwrite");
+  const sets = await tx.store.index("trainingId").getAll(trainingId);
+  sets.sort((a, b) => a.orderInTraining - b.orderInTraining);
+
+  const currentIndex = sets.findIndex((set) => set.id === setId);
+  if (currentIndex === -1) {
+    throw new Error(`Set with id ${setId} not found in training ${trainingId}`);
+  }
+
+  const [set] = sets.splice(currentIndex, 1);
+  const nextIndex = Math.max(0, Math.min(targetIndex, sets.length));
+  sets.splice(nextIndex, 0, set);
+
+  await Promise.all(
+    sets.map((item, orderInTraining) =>
+      tx.store.put({ ...item, orderInTraining }),
+    ),
+  );
+  await tx.done;
+}
+
 // Get a set by ID
 export async function getSet(id: string): Promise<Set | undefined> {
   const db = await getDB();
