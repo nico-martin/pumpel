@@ -1,8 +1,11 @@
 {
   "name": "pumpel",
   "private": true,
-  "version": "0.1.31",
+  "version": "0.1.32",
   "packageManager": "pnpm@11.1.1",
+  "engines": {
+    "node": ">=22.13"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

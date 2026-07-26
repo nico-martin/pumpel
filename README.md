@@ -45,7 +45,7 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 
 ### Prerequisites
 
-- Node.js 20 or higher
+- Node.js 22.13 or higher
 - pnpm 11
 
 ### Installation
