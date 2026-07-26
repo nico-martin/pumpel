@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Info, Plus, Minus } from "lucide-react";
-import { getLastSetForExercise } from "@/db/queries";
-import type { Round } from "@/db/types";
+import { Info, Plus, Minus, Trash2 } from "lucide-react";
+import { getRecentSetsForExercise, type RecentExerciseSet } from "@/db/queries";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,11 +23,6 @@ interface CurrentRound {
   notes: string;
 }
 
-interface LastSetData {
-  rounds: Round[];
-  date: number;
-}
-
 interface AddRoundProps {
   exerciseName: string;
   exerciseId: string;
@@ -38,7 +32,7 @@ interface AddRoundProps {
   currentRound: CurrentRound;
   onRoundChange: (field: keyof CurrentRound, value: string) => void;
   onAddRound: () => void;
-  onStartNewSet: () => void;
+  onDeleteSet: () => void;
   inline?: boolean;
   exerciseDescription?: string;
 }
@@ -52,12 +46,12 @@ export function AddRound({
   currentRound,
   onRoundChange,
   onAddRound,
-  onStartNewSet,
+  onDeleteSet,
   inline = false,
   exerciseDescription,
 }: AddRoundProps) {
-  const [showLastUsed, setShowLastUsed] = useState(false);
-  const [lastSetData, setLastSetData] = useState<LastSetData | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [recentSets, setRecentSets] = useState<RecentExerciseSet[]>([]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -67,13 +61,13 @@ export function AddRound({
     return `${day}.${month}.${year}`;
   };
 
-  const handleShowLastUsed = async () => {
+  const handleShowHistory = async () => {
     try {
-      const data = await getLastSetForExercise(exerciseId, trainingId);
-      setLastSetData(data);
-      setShowLastUsed(true);
+      const data = await getRecentSetsForExercise(exerciseId, trainingId);
+      setRecentSets(data);
+      setShowHistory(true);
     } catch (error) {
-      console.error("Error fetching last set data:", error);
+      console.error("Error fetching exercise history:", error);
     }
   };
 
@@ -182,19 +176,83 @@ export function AddRound({
           rows={2}
         />
       </div>
-      <div className="flex gap-2">
-        <Button
-          className="flex-1"
-          onClick={onAddRound}
-          disabled={!currentRound.weight || !currentRound.reps}
-        >
-          Add Round
-        </Button>
-        <Button variant="outline" onClick={onStartNewSet}>
-          New Set
-        </Button>
-      </div>
+      <Button
+        className="w-full"
+        onClick={onAddRound}
+        disabled={!currentRound.weight || !currentRound.reps}
+      >
+        Add Round
+      </Button>
     </div>
+  );
+
+  const historyDialog = (
+    <AlertDialog open={showHistory} onOpenChange={setShowHistory}>
+      <AlertDialogTrigger asChild>
+        <Button
+          size="icon-xs"
+          variant="ghost"
+          onClick={handleShowHistory}
+          aria-label={`Show recent ${exerciseName} sets`}
+        >
+          <Info className="h-4 w-4" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+        <AlertDialogHeader>
+          {exerciseDescription && (
+            <div className="mb-3 text-left text-sm whitespace-pre-wrap text-muted-foreground">
+              {exerciseDescription}
+            </div>
+          )}
+          <AlertDialogTitle>Recent Sets</AlertDialogTitle>
+          <AlertDialogDescription>
+            Last five recorded sets, newest first.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {recentSets.length > 0 ? (
+          <div className="space-y-2">
+            {recentSets.map((set, setIndex) => (
+              <div key={set.id} className="rounded-lg border p-3">
+                <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <span>{formatDate(set.date)}</span>
+                  <span>
+                    {setIndex === 0
+                      ? "Latest"
+                      : `${setIndex} set${setIndex === 1 ? "" : "s"} ago`}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {set.rounds.map((round) => (
+                    <div
+                      key={round.id}
+                      className="max-w-full rounded-md bg-muted px-2 py-1 text-left text-xs"
+                    >
+                      <span className="font-medium">
+                        {round.weight}
+                        {weightUnit} × {round.reps}
+                      </span>
+                      {round.notes && (
+                        <span className="block max-w-48 truncate text-muted-foreground">
+                          {round.notes}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No previous data found for this exercise.
+          </p>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogAction>Close</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 
   // Inline mode - no card wrapper, just content with a small title
@@ -203,63 +261,17 @@ export function AddRound({
       <div className="pt-3 border-t">
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-sm font-medium">Add Round</h4>
-          <AlertDialog open={showLastUsed} onOpenChange={setShowLastUsed}>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="icon-xs"
-                variant="ghost"
-                onClick={handleShowLastUsed}
-              >
-                <Info className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                {exerciseDescription && (
-                  <div className="mb-3 text-sm text-left text-muted-foreground whitespace-pre-wrap">
-                    {exerciseDescription}
-                  </div>
-                )}
-                <AlertDialogTitle>Last Set</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {lastSetData ? (
-                    <div className="space-y-3">
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(lastSetData.date)}
-                      </p>
-                      <div className="space-y-1">
-                        {lastSetData.rounds.map((round, index) => (
-                          <div key={round.id} className="flex gap-2 text-sm">
-                            <span className="text-muted-foreground w-8">
-                              #{index + 1}
-                            </span>
-                            <span className="font-medium">
-                              {round.weight}
-                              {weightUnit}
-                            </span>
-                            <span className="text-muted-foreground">×</span>
-                            <span className="font-medium">
-                              {round.reps} reps
-                            </span>
-                            {round.notes && (
-                              <span className="text-muted-foreground ml-2">
-                                {round.notes}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <p>No previous data found for this exercise.</p>
-                  )}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction>Close</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex items-center gap-1">
+            {historyDialog}
+            <Button
+              size="icon-xs"
+              variant="destructive"
+              onClick={onDeleteSet}
+              aria-label={`Delete ${exerciseName} set`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         {content}
       </div>
@@ -272,63 +284,17 @@ export function AddRound({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Add Round to {exerciseName}</span>
-          <AlertDialog open={showLastUsed} onOpenChange={setShowLastUsed}>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="icon-xs"
-                variant="ghost"
-                onClick={handleShowLastUsed}
-              >
-                <Info className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                {exerciseDescription && (
-                  <div className="mb-3 text-sm text-muted-foreground whitespace-pre-wrap">
-                    {exerciseDescription}
-                  </div>
-                )}
-                <AlertDialogTitle>Last Set</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {lastSetData ? (
-                    <div className="space-y-3">
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(lastSetData.date)}
-                      </p>
-                      <div className="space-y-1">
-                        {lastSetData.rounds.map((round, index) => (
-                          <div key={round.id} className="flex gap-2 text-sm">
-                            <span className="text-muted-foreground w-8">
-                              #{index + 1}
-                            </span>
-                            <span className="font-medium">
-                              {round.weight}
-                              {weightUnit}
-                            </span>
-                            <span className="text-muted-foreground">×</span>
-                            <span className="font-medium">
-                              {round.reps} reps
-                            </span>
-                            {round.notes && (
-                              <span className="text-muted-foreground ml-2">
-                                {round.notes}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <p>No previous data found for this exercise.</p>
-                  )}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction>Close</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex items-center gap-1">
+            {historyDialog}
+            <Button
+              size="icon-xs"
+              variant="destructive"
+              onClick={onDeleteSet}
+              aria-label={`Delete ${exerciseName} set`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>{content}</CardContent>

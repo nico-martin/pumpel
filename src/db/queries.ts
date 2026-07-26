@@ -146,14 +146,21 @@ export async function getLastUsedWeightForExercise(
   };
 }
 
-// Get the entire last set (all rounds) for a specific exercise
-export async function getLastSetForExercise(
+export interface RecentExerciseSet {
+  id: string;
+  rounds: Round[];
+  date: number;
+}
+
+// Get the most recent recorded sets for a specific exercise
+export async function getRecentSetsForExercise(
   exerciseId: string,
   excludeTrainingId?: string,
-): Promise<{ rounds: Round[]; date: number } | null> {
+  limit = 5,
+): Promise<RecentExerciseSet[]> {
   const exerciseHistory = await getExerciseHistory(exerciseId);
   if (!exerciseHistory || exerciseHistory.history.length === 0) {
-    return null;
+    return [];
   }
 
   // Filter out the current training if excludeTrainingId is provided
@@ -161,25 +168,18 @@ export async function getLastSetForExercise(
     ? exerciseHistory.history.filter((h) => h.training.id !== excludeTrainingId)
     : exerciseHistory.history;
 
-  if (filteredHistory.length === 0) {
-    return null;
-  }
-
-  // Get the most recent training (excluding current if specified)
-  const mostRecentTraining = filteredHistory[0];
-
-  // Get the last set from that training
-  const lastSet = mostRecentTraining.sets[mostRecentTraining.sets.length - 1];
-
-  // Return all rounds from that set
-  if (lastSet.rounds.length === 0) {
-    return null;
-  }
-
-  return {
-    rounds: lastSet.rounds,
-    date: mostRecentTraining.training.startTime,
-  };
+  return filteredHistory
+    .flatMap(({ training, sets }) =>
+      [...sets]
+        .sort((a, b) => b.orderInTraining - a.orderInTraining)
+        .filter((set) => set.rounds.length > 0)
+        .map((set) => ({
+          id: set.id,
+          rounds: set.rounds,
+          date: training.startTime,
+        })),
+    )
+    .slice(0, limit);
 }
 
 // Helper to add a complete training session with sets and rounds

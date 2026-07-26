@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   updateTraining,
   deleteTraining,
@@ -25,7 +25,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { ExerciseSelector } from "@/components/ExerciseSelector";
 import { TextareaWithSuggestions } from "@/components/TextareaWithSuggestions";
-import { ArrowDown, ArrowUp, Trash2, Edit, Check } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Edit,
+  Play,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { AddRound } from "@/components/trainingView/AddRound";
 import {
   AlertDialog,
@@ -61,7 +70,6 @@ export function TrainingView({
   const [training, setTraining] = useState<TrainingWithDetails | null>(null);
   const [currentSetId, setCurrentSetId] = useState<string | null>(null);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
-  const [insertAfterSetId, setInsertAfterSetId] = useState<string | null>(null);
   const [currentRound, setCurrentRound] = useState<CurrentRound>({
     weight: "",
     reps: "9",
@@ -176,12 +184,7 @@ export function TrainingView({
 
   const handleSelectExercise = async (exercise: Exercise) => {
     try {
-      const setIndex =
-        training?.sets.findIndex((set) => set.id === insertAfterSetId) ?? -1;
-      const orderInTraining =
-        insertAfterSetId && setIndex >= 0
-          ? setIndex + 1
-          : training?.sets.length || 0;
+      const orderInTraining = training?.sets.length || 0;
       const newSet = await createSetAt(
         {
           trainingId,
@@ -191,7 +194,6 @@ export function TrainingView({
       );
 
       setShowExerciseSelector(false);
-      setInsertAfterSetId(null);
 
       // Reload training first to get the new set
       await loadTraining();
@@ -256,12 +258,6 @@ export function TrainingView({
     }
   };
 
-  const handleStartNewSet = () => {
-    setInsertAfterSetId(currentSetId);
-    setShowExerciseSelector(true);
-    setCurrentSetId(null);
-  };
-
   const handleMoveSet = async (setId: string, targetIndex: number) => {
     try {
       await moveSet(trainingId, setId, targetIndex);
@@ -282,11 +278,6 @@ export function TrainingView({
       if (currentSetId === setId) {
         setCurrentSetId(null);
       }
-      if (insertAfterSetId === setId) {
-        setShowExerciseSelector(false);
-        setInsertAfterSetId(null);
-      }
-
       await loadTraining();
     } catch (error) {
       console.error("Error deleting set:", error);
@@ -437,10 +428,7 @@ export function TrainingView({
           variant="ghost"
           size="sm"
           className="mt-2 w-full"
-          onClick={() => {
-            setShowExerciseSelector(false);
-            setInsertAfterSetId(null);
-          }}
+          onClick={() => setShowExerciseSelector(false)}
         >
           Cancel
         </Button>
@@ -614,129 +602,123 @@ export function TrainingView({
 
         {/* Exercise Sets */}
         {training.sets.map((set, idx) => (
-          <Fragment key={set.id}>
-            <Card
-              size="sm"
-              className={currentSetId === set.id ? "ring-2 ring-primary" : ""}
-            >
-              <CardHeader>
-                <CardTitle className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:justify-between">
-                  <span className="min-w-0 w-full truncate md:flex-1">
-                    {idx + 1}. {set.exercise.name}
-                  </span>
-                  <div className="flex w-full shrink-0 justify-end gap-1 md:w-auto">
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      onClick={() => handleMoveSet(set.id, idx - 1)}
-                      disabled={idx === 0}
-                      aria-label={`Move ${set.exercise.name} up`}
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      onClick={() => handleMoveSet(set.id, idx + 1)}
-                      disabled={idx === training.sets.length - 1}
-                      aria-label={`Move ${set.exercise.name} down`}
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </Button>
-                    {currentSetId !== set.id && (
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        onClick={() => setCurrentSetId(set.id)}
-                      >
-                        Continue
-                      </Button>
-                    )}
-                    <Button
-                      size="icon-xs"
-                      variant="destructive"
-                      onClick={() => handleDeleteSet(set.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {set.rounds.length > 0 && (
-                  <div className="space-y-1 mb-3">
-                    {set.rounds.map((round, roundIdx) => (
-                      <div
-                        key={round.id}
-                        className="flex gap-2 text-xs items-center"
-                      >
-                        <span className="text-muted-foreground w-8">
-                          #{roundIdx + 1}
-                        </span>
-                        <span className="font-medium">
-                          {round.weight}
-                          {set.exercise.weightUnit}
-                        </span>
-                        <span className="text-muted-foreground">×</span>
-                        <span className="font-medium">{round.reps} reps</span>
-                        {round.notes && (
-                          <span className="text-muted-foreground ml-2">
-                            {round.notes}
-                          </span>
-                        )}
-                        <Button
-                          size="icon-xs"
-                          variant="ghost"
-                          onClick={() => handleDeleteRound(round.id)}
-                          className="ml-auto"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add Round Section - shown when this set is active */}
-                {currentSetId === set.id && (
-                  <AddRound
-                    exerciseName={set.exercise.name}
-                    exerciseId={set.exerciseId}
-                    trainingId={trainingId}
-                    weightUnit={set.exercise.weightUnit}
-                    steps={set.exercise.steps}
-                    currentRound={currentRound}
-                    onRoundChange={(field, value) =>
-                      setCurrentRound((prev) => ({ ...prev, [field]: value }))
+          <Card
+            key={set.id}
+            size="sm"
+            className={currentSetId === set.id ? "ring-2 ring-primary" : ""}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between gap-2">
+                <span className="min-w-0 max-w-[calc(100%_-_5.5rem)] flex-1 truncate">
+                  {idx + 1}. {set.exercise.name}
+                </span>
+                <div className="flex shrink-0 gap-1">
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={() => handleMoveSet(set.id, idx - 1)}
+                    disabled={idx === 0}
+                    aria-label={`Move ${set.exercise.name} up`}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={() => handleMoveSet(set.id, idx + 1)}
+                    disabled={idx === training.sets.length - 1}
+                    aria-label={`Move ${set.exercise.name} down`}
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={() =>
+                      setCurrentSetId((currentId) =>
+                        currentId === set.id ? null : set.id,
+                      )
                     }
-                    onAddRound={handleAddRound}
-                    onStartNewSet={handleStartNewSet}
-                    inline={true}
-                    exerciseDescription={set.exercise.description}
-                  />
-                )}
-              </CardContent>
-            </Card>
-            {showExerciseSelector && insertAfterSetId === set.id
-              ? exerciseSelector
-              : null}
-          </Fragment>
+                    aria-label={`${currentSetId === set.id ? "Close" : "Continue"} ${set.exercise.name}`}
+                  >
+                    {currentSetId === set.id ? (
+                      <X className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {set.rounds.length > 0 && (
+                <div className="space-y-1 mb-3">
+                  {set.rounds.map((round, roundIdx) => (
+                    <div
+                      key={round.id}
+                      className="flex gap-2 text-xs items-center"
+                    >
+                      <span className="text-muted-foreground w-8">
+                        #{roundIdx + 1}
+                      </span>
+                      <span className="font-medium">
+                        {round.weight}
+                        {set.exercise.weightUnit}
+                      </span>
+                      <span className="text-muted-foreground">×</span>
+                      <span className="font-medium">{round.reps} reps</span>
+                      {round.notes && (
+                        <span className="text-muted-foreground ml-2">
+                          {round.notes}
+                        </span>
+                      )}
+                      <Button
+                        size="icon-xs"
+                        variant="ghost"
+                        onClick={() => handleDeleteRound(round.id)}
+                        className="ml-auto"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Round Section - shown when this set is active */}
+              {currentSetId === set.id && (
+                <AddRound
+                  exerciseName={set.exercise.name}
+                  exerciseId={set.exerciseId}
+                  trainingId={trainingId}
+                  weightUnit={set.exercise.weightUnit}
+                  steps={set.exercise.steps}
+                  currentRound={currentRound}
+                  onRoundChange={(field, value) =>
+                    setCurrentRound((prev) => ({ ...prev, [field]: value }))
+                  }
+                  onAddRound={handleAddRound}
+                  onDeleteSet={() => handleDeleteSet(set.id)}
+                  inline={true}
+                  exerciseDescription={set.exercise.description}
+                />
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {showExerciseSelector && insertAfterSetId === null
-        ? exerciseSelector
-        : !currentSetId && (
-            <Button
-              className="w-full"
-              onClick={() => {
-                setInsertAfterSetId(null);
-                setShowExerciseSelector(true);
-              }}
-            >
-              Start New Set
-            </Button>
-          )}
+      {showExerciseSelector ? (
+        exerciseSelector
+      ) : (
+        <Button
+          className="w-full"
+          onClick={() => setShowExerciseSelector(true)}
+        >
+          <Plus className="h-4 w-4" />
+          New Exercise
+        </Button>
+      )}
 
       {/* Cool Down Card */}
       <Card size="sm" className="mt-4">
