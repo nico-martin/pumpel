@@ -608,8 +608,8 @@ export function TrainingView({
             className={currentSetId === set.id ? "ring-2 ring-primary" : ""}
           >
             <CardHeader>
-              <CardTitle className="flex items-center justify-between gap-2">
-                <span className="min-w-0 max-w-[calc(100%_-_5.5rem)] flex-1 truncate">
+              <CardTitle className="flex min-w-0 items-center justify-between gap-2">
+                <span className="min-w-0 flex-1 truncate">
                   {idx + 1}. {set.exercise.name}
                 </span>
                 <div className="flex shrink-0 gap-1">
