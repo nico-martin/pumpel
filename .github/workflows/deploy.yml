@@ -30,11 +30,11 @@ jobs:
       - name: Build project
         run: pnpm build
         env:
-          # Optional: enables Google Drive backups (OAuth Web client ID, not a secret)
-          VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          # Optional: enables Google Drive backups (OAuth Web client ID)
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           # Optional: enables choosing the backup folder (Google Picker)
-          VITE_GOOGLE_API_KEY: ${{ vars.GOOGLE_API_KEY }}
-          VITE_GOOGLE_APP_ID: ${{ vars.GOOGLE_APP_ID }}
+          VITE_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          VITE_GOOGLE_APP_ID: ${{ secrets.GOOGLE_APP_ID }}
 
       - name: Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0

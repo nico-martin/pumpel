@@ -273,7 +273,7 @@ Automatic backups only show up if the app is built with a Google OAuth client ID
 3. Create an **OAuth client ID** of type **Web application** and add your origins (e.g. `http://localhost:5000` and your production URL) under **Authorized JavaScript origins**.
 4. Provide the client ID at build time:
    - locally: create `.env.local` with `VITE_GOOGLE_CLIENT_ID=<your-client-id>`
-   - GitHub Actions: add a repository **variable** `GOOGLE_CLIENT_ID`
+   - GitHub Actions: add a repository **secret** `GOOGLE_CLIENT_ID`
 
 ### Choosing the backup folder (optional)
 
@@ -284,6 +284,6 @@ By default backups go to a "Pumpel Backups" folder the app creates. To let users
 3. Look up the **project number** (Cloud Console → project settings). This is the Picker "app ID". Without it, picking a folder doesn't grant the app access to it.
 4. Provide both at build time:
    - locally in `.env.local`: `VITE_GOOGLE_API_KEY=<api-key>` and `VITE_GOOGLE_APP_ID=<project-number>`
-   - GitHub Actions: repository **variables** `GOOGLE_API_KEY` and `GOOGLE_APP_ID`
+   - GitHub Actions: repository **secrets** `GOOGLE_API_KEY` and `GOOGLE_APP_ID`
 
 The app only uses the `drive.file` scope, so it can only see files and folders it created itself, plus folders the user picked in the Picker.
