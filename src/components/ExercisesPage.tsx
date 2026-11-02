@@ -21,7 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit, ChevronLeft, Plus } from "lucide-react";
+import { Trash2, Edit, ChevronLeft, Plus, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { JsonImportDialog } from "@/components/JsonImportDialog";
+import {
+  exerciseImportInstructions,
+  importExercisesFromJson,
+} from "@/services/jsonImport";
 import {
   ExerciseForm,
   type WeightUnit,
@@ -42,6 +48,8 @@ export function ExercisesPage() {
   const [editDefaultWeight, setEditDefaultWeight] = useState("0");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [showJsonImport, setShowJsonImport] = useState(false);
 
   useEffect(() => {
     loadExercises();
@@ -179,8 +187,34 @@ export function ExercisesPage() {
     }
   };
 
+  // Filter by search query (matches name, body part or description; every
+  // whitespace-separated term has to match)
+  const searchTerms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const filteredExercises = searchTerms.length
+    ? exercises.filter((exercise) => {
+        const haystack = [
+          exercise.name,
+          exercise.bodyPart,
+          exercise.description,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return searchTerms.every((term) => haystack.includes(term));
+      })
+    : exercises;
+
+  // All body parts in use (unfiltered), for the JSON import description
+  const existingBodyParts = [
+    ...new Set(
+      exercises
+        .map((exercise) => exercise.bodyPart?.trim())
+        .filter((bodyPart): bodyPart is string => !!bodyPart),
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+
   // Group exercises by body part
-  const groupedExercises = exercises.reduce(
+  const groupedExercises = filteredExercises.reduce(
     (acc, exercise) => {
       const bodyPart = exercise.bodyPart || "Uncategorized";
       if (!acc[bodyPart]) {
@@ -230,9 +264,41 @@ export function ExercisesPage() {
         Create New Exercise
       </Button>
 
+      {exercises.length > 0 && (
+        <div className="relative mb-6">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search exercises"
+            aria-label="Search exercises"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setSearch("");
+            }}
+            className="pl-9 pr-9 [&::-webkit-search-cancel-button]:hidden"
+          />
+          {search && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+              className="absolute right-0.5 top-1/2 size-8 -translate-y-1/2"
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
+      )}
+
       {exercises.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">
           No exercises yet. Click the button above to create your first one!
+        </p>
+      ) : filteredExercises.length === 0 ? (
+        <p className="text-muted-foreground text-center py-8">
+          No exercises match "{search.trim()}".
         </p>
       ) : (
         <div className="space-y-6">
@@ -285,6 +351,27 @@ export function ExercisesPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Dev-only JSON import */}
+      {import.meta.env.DEV && (
+        <>
+          <Button
+            variant="outline"
+            className="w-full mt-6"
+            onClick={() => setShowJsonImport(true)}
+          >
+            Import Exercises
+          </Button>
+          <JsonImportDialog
+            open={showJsonImport}
+            onOpenChange={setShowJsonImport}
+            title="Import Exercises"
+            onImport={importExercisesFromJson}
+            onImported={loadExercises}
+            instructions={exerciseImportInstructions(existingBodyParts)}
+          />
+        </>
       )}
 
       {/* Create Dialog */}

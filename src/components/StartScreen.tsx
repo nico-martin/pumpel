@@ -9,6 +9,7 @@ import {
 import { getTrainingWithDetails } from "@/db/queries";
 import { deleteSet, createSet } from "@/db/sets";
 import { deleteRoundsBySetId } from "@/db/rounds";
+import { notifyTrainingChanged } from "@/services/autoBackup";
 import { getUser } from "@/db/user";
 import { getAllTrainingTemplates } from "@/db/trainingTemplates";
 import { getAllExercises } from "@/db/exercises";
@@ -252,6 +253,9 @@ export function StartScreen() {
       }
       // Delete the training
       await deleteTraining(deleteConfirmId);
+      if (activeTraining?.id !== deleteConfirmId) {
+        notifyTrainingChanged();
+      }
 
       // Clear active training if it was deleted
       if (activeTraining?.id === deleteConfirmId) {

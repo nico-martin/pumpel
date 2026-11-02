@@ -32,6 +32,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { JsonImportDialog } from "@/components/JsonImportDialog";
+import {
+  templateImportInstructions,
+  importTemplatesFromJson,
+} from "@/services/jsonImport";
 
 export function TrainingTemplatesPage() {
   const navigate = useNavigate();
@@ -48,6 +53,7 @@ export function TrainingTemplatesPage() {
     exerciseIds: [] as string[],
   });
   const [searchValue, setSearchValue] = useState("");
+  const [showJsonImport, setShowJsonImport] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -254,6 +260,29 @@ export function TrainingTemplatesPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Dev-only JSON import */}
+      {import.meta.env.DEV && (
+        <>
+          <Button
+            variant="outline"
+            className="w-full mt-6"
+            onClick={() => setShowJsonImport(true)}
+          >
+            Import Templates
+          </Button>
+          <JsonImportDialog
+            open={showJsonImport}
+            onOpenChange={setShowJsonImport}
+            title="Import Templates"
+            onImport={importTemplatesFromJson}
+            onImported={loadData}
+            instructions={templateImportInstructions(
+              exercises.map((exercise) => exercise.name),
+            )}
+          />
+        </>
       )}
 
       {/* Edit/Create Dialog */}

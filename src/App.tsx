@@ -10,6 +10,7 @@ import { Navigation } from "@/components/Navigation";
 import { NameSetupModal } from "@/components/NameSetupModal";
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 import { getUser, saveUser } from "@/db/user";
+import { initAutoBackup } from "@/services/autoBackup";
 
 export function App() {
   const [showNameSetup, setShowNameSetup] = useState(false);
@@ -17,6 +18,7 @@ export function App() {
 
   useEffect(() => {
     checkUser();
+    initAutoBackup();
   }, []);
 
   const checkUser = async () => {

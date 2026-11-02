@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Sun, Moon, Monitor, ChevronLeft } from "lucide-react";
+import { buildBackupJson } from "@/services/backupData";
+import { StorageCard } from "@/components/account/StorageCard";
+import { DriveBackupCard } from "@/components/account/DriveBackupCard";
 
 export function AccountPage() {
   const navigate = useNavigate();
@@ -124,30 +127,7 @@ export function AccountPage() {
 
   const handleExport = async () => {
     try {
-      const [user, exercises, trainings, sets, rounds, trainingTemplates] =
-        await Promise.all([
-          getUser(),
-          getAllExercises(),
-          getAllTrainings(),
-          getAllSets(),
-          getAllRounds(),
-          getAllTrainingTemplates(),
-        ]);
-
-      const exportData = {
-        version: 2,
-        exportedAt: Date.now(),
-        data: {
-          user,
-          exercises,
-          trainings,
-          sets,
-          rounds,
-          trainingTemplates,
-        },
-      };
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      const blob = new Blob([await buildBackupJson()], {
         type: "application/json",
       });
       const url = URL.createObjectURL(blob);
@@ -415,7 +395,8 @@ export function AccountPage() {
             </p>
             <p>
               <strong className="text-foreground">No Cloud</strong> - Your
-              workout data never leaves your device.
+              workout data never leaves your device, unless you enable automatic
+              backups to your own Google Drive.
             </p>
             <p>
               <strong className="text-foreground">No Server</strong> - This app
@@ -476,6 +457,10 @@ export function AccountPage() {
           </div>
         </CardContent>
       </Card>
+
+      <StorageCard />
+
+      <DriveBackupCard />
 
       {/* Data Management */}
       <Card size="sm">

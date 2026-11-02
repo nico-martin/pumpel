@@ -16,7 +16,7 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 ## Features
 
 - **100% Local** - All data stored locally in your browser using IndexedDB
-- **No Cloud** - Your workout data never leaves your device
+- **No Cloud** - Your workout data never leaves your device (unless you opt into Google Drive backups)
 - **No Server** - Runs entirely in your browser
 - **No Cost** - Free forever, no subscriptions or hidden fees
 - **Progressive Web App (PWA)** - Install on your device and use offline
@@ -27,6 +27,8 @@ A privacy-focused fitness app that helps you track your gym workouts, sets, and 
 - **Workout Tracking** - Track sets, rounds, weights, and reps
 - **History** - View your workout history and progress
 - **Export/Import** - Backup and restore your data as JSON
+- **Automatic Backups** - Optional backups to your own Google Drive after every training, older than 60 days are cleaned up
+- **Persistent Storage** - Ask the browser not to evict your data
 - **User Profile** - Personalize with your name
 
 ## Tech Stack
@@ -261,3 +263,27 @@ Tested on:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+## Google Drive Backups (optional)
+
+Automatic backups only show up if the app is built with a Google OAuth client ID:
+
+1. In the [Google Cloud Console](https://console.cloud.google.com/), create a project and enable the **Google Drive API**.
+2. Set up the OAuth consent screen and add the scope `https://www.googleapis.com/auth/drive.file`.
+3. Create an **OAuth client ID** of type **Web application** and add your origins (e.g. `http://localhost:5000` and your production URL) under **Authorized JavaScript origins**.
+4. Provide the client ID at build time:
+   - locally: create `.env.local` with `VITE_GOOGLE_CLIENT_ID=<your-client-id>`
+   - GitHub Actions: add a repository **variable** `GOOGLE_CLIENT_ID`
+
+### Choosing the backup folder (optional)
+
+By default backups go to a "Pumpel Backups" folder the app creates. To let users pick any folder ("Change folder" on the Account page) via the Google Picker, also:
+
+1. Enable the **Google Picker API** in the same project.
+2. Create an **API key** (APIs & Services → Credentials), restricted to your website origins and to the Google Picker API.
+3. Look up the **project number** (Cloud Console → project settings). This is the Picker "app ID". Without it, picking a folder doesn't grant the app access to it.
+4. Provide both at build time:
+   - locally in `.env.local`: `VITE_GOOGLE_API_KEY=<api-key>` and `VITE_GOOGLE_APP_ID=<project-number>`
+   - GitHub Actions: repository **variables** `GOOGLE_API_KEY` and `GOOGLE_APP_ID`
+
+The app only uses the `drive.file` scope, so it can only see files and folders it created itself, plus folders the user picked in the Picker.

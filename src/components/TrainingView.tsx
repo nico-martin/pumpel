@@ -13,6 +13,7 @@ import { createSetAt, deleteSet, moveSet } from "@/db/sets";
 import { createRound, deleteRound } from "@/db/rounds";
 import { deleteRoundsBySetId } from "@/db/rounds";
 import { getUser } from "@/db/user";
+import { notifyTrainingChanged } from "@/services/autoBackup";
 import type { Exercise, TrainingWithDetails } from "@/db/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -182,6 +183,12 @@ export function TrainingView({
     }
   }, [currentSetId, training, loadLastUsedWeight]);
 
+  // Edits to an already finished training trigger a (debounced) backup.
+  // Active trainings are backed up once they are finished.
+  const backupIfFinished = () => {
+    if (!isActive) notifyTrainingChanged();
+  };
+
   const handleSelectExercise = async (exercise: Exercise) => {
     try {
       const orderInTraining = training?.sets.length || 0;
@@ -197,6 +204,7 @@ export function TrainingView({
 
       // Reload training first to get the new set
       await loadTraining();
+      backupIfFinished();
 
       // Then set current set ID, which will trigger the useEffect to load weight
       setCurrentSetId(newSet.id);
@@ -229,6 +237,7 @@ export function TrainingView({
         notes: "",
       }));
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error adding round:", error);
     }
@@ -249,6 +258,8 @@ export function TrainingView({
         await updateTraining(trainingId, {
           endTime: Date.now(),
         });
+        // Called right in the click handler so a token refresh popup is allowed.
+        notifyTrainingChanged({ immediate: true });
       }
 
       // For both active and completed trainings, go back
@@ -262,6 +273,7 @@ export function TrainingView({
     try {
       await moveSet(trainingId, setId, targetIndex);
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error moving set:", error);
     }
@@ -279,6 +291,7 @@ export function TrainingView({
         setCurrentSetId(null);
       }
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error deleting set:", error);
     }
@@ -288,6 +301,7 @@ export function TrainingView({
     try {
       await deleteRound(roundId);
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error deleting round:", error);
     }
@@ -310,6 +324,7 @@ export function TrainingView({
       });
       setIsEditingWarmUp(false);
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error saving warm up:", error);
     }
@@ -322,6 +337,7 @@ export function TrainingView({
       });
       setIsEditingCoolDown(false);
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error saving cool down:", error);
     }
@@ -370,6 +386,7 @@ export function TrainingView({
       await updateTraining(trainingId, updates);
       setIsEditingDateTime(false);
       await loadTraining();
+      backupIfFinished();
     } catch (error) {
       console.error("Error saving date/time:", error);
     }
@@ -388,6 +405,7 @@ export function TrainingView({
       }
       // Delete the training
       await deleteTraining(trainingId);
+      backupIfFinished();
       onTrainingEnd();
     } catch (error) {
       console.error("Error deleting training:", error);
