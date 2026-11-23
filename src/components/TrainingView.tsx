@@ -258,7 +258,6 @@ export function TrainingView({
         await updateTraining(trainingId, {
           endTime: Date.now(),
         });
-        // Called right in the click handler so a token refresh popup is allowed.
         notifyTrainingChanged({ immediate: true });
       }
 

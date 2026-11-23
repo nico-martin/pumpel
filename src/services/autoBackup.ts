@@ -5,10 +5,8 @@
 // - A backup is uploaded whenever a training is finished, or a finished
 //   training is edited or deleted.
 // - After each backup, files in that folder older than 60 days are trashed.
-// - Access tokens expire after ~1h and can only be renewed with a popup during
-//   a user gesture. If that isn't possible, the backup is marked "pending" and
-//   retried the next time it can be (next finished training, "Back up now",
-//   or app start while the token is still valid).
+// - Access tokens expire after ~1h. Automatic backups never open a sign-in
+//   popup; if a new token is needed, the backup waits for the Account page.
 
 import { useSyncExternalStore } from "react";
 import { buildBackupJson } from "./backupData";
@@ -18,7 +16,6 @@ import {
   findOrCreateFolder,
   getFolder,
   isDriveConfigured,
-  loadGis,
   loadPicker,
   pickFolder,
   requestAccessToken,
@@ -43,6 +40,7 @@ export interface DriveBackupState {
   lastBackupFile?: string;
   lastCleanupAt?: number;
   pending: boolean;
+  needsReconnect: boolean;
   lastError?: string;
   running: boolean; // runtime only, not persisted
 }
@@ -50,6 +48,7 @@ export interface DriveBackupState {
 const initialState: DriveBackupState = {
   connected: false,
   pending: false,
+  needsReconnect: false,
   running: false,
 };
 
@@ -100,23 +99,17 @@ function storedToken(): AccessToken | null {
   return null;
 }
 
-function hasUserActivation(): boolean {
-  // Popups are only allowed shortly after a user gesture.
-  const activation = (
-    navigator as Navigator & { userActivation?: { isActive: boolean } }
-  ).userActivation;
-  // Browsers without the API (older Safari): assume we may try; GIS reports a
-  // blocked popup via error_callback, which we handle as "pending".
-  return activation ? activation.isActive : true;
-}
-
 async function getToken(interactive: boolean): Promise<AccessToken | null> {
   const token = storedToken();
   if (token) return token;
   if (!interactive) return null;
 
   const fresh = await requestAccessToken("");
-  setState({ accessToken: fresh.token, tokenExpiresAt: fresh.expiresAt });
+  setState({
+    accessToken: fresh.token,
+    tokenExpiresAt: fresh.expiresAt,
+    needsReconnect: false,
+  });
   return fresh;
 }
 
@@ -185,24 +178,26 @@ function backupFileName(date = new Date()): string {
 }
 
 async function performBackup(interactive: boolean): Promise<void> {
-  let token = await getToken(interactive);
+  if (!storedToken()) {
+    setState({ pending: true, needsReconnect: true, lastError: undefined });
+  }
+  const token = await getToken(interactive);
   if (!token) {
-    setState({ pending: true });
     return;
   }
 
   try {
     await uploadAndCleanup(token.token);
   } catch (error) {
-    // Token revoked/expired early: drop it and retry once if we can.
+    // A popup after a network call may be blocked. Wait for a fresh click.
     if (error instanceof DriveHttpError && error.status === 401) {
-      setState({ accessToken: undefined, tokenExpiresAt: undefined });
-      token = await getToken(interactive);
-      if (!token) {
-        setState({ pending: true });
-        return;
-      }
-      await uploadAndCleanup(token.token);
+      setState({
+        accessToken: undefined,
+        tokenExpiresAt: undefined,
+        pending: true,
+        needsReconnect: true,
+        lastError: undefined,
+      });
     } else {
       throw error;
     }
@@ -265,7 +260,7 @@ export async function runBackup({
         pending: true,
         lastError:
           error instanceof PopupBlockedError
-            ? "Google sign-in is needed again. Tap “Back up now”."
+            ? "The Google sign-in window was closed or blocked. Please try again."
             : error instanceof Error
               ? error.message
               : String(error),
@@ -279,8 +274,7 @@ export async function runBackup({
 }
 
 // Call after a training was finished, or a finished training changed.
-// `immediate` should be used directly in click handlers (e.g. "Finish
-// training") so a token refresh popup is still allowed. Everything else is
+// `immediate` skips the debounce for a finished training. Other changes are
 // debounced so several quick edits result in a single upload.
 export function notifyTrainingChanged({
   immediate = false,
@@ -291,7 +285,7 @@ export function notifyTrainingChanged({
   debounceTimer = null;
 
   if (immediate) {
-    void runBackup({ interactive: hasUserActivation() });
+    void runBackup({ interactive: false });
     return;
   }
 
@@ -306,14 +300,15 @@ export function notifyTrainingChanged({
 // while the stored token is still valid (no popup possible here).
 export function initAutoBackup(): void {
   if (!state.connected) return;
-  // Preload so a later token refresh popup opens fast enough after a click.
-  loadGis().catch(() => {});
+  if (state.pending) {
+    void runBackup({ interactive: false });
+    return;
+  }
+
   const token = storedToken();
   if (!token) return;
 
-  if (state.pending) {
-    void runBackup({ interactive: false });
-  } else if (
+  if (
     state.folderId &&
     (!state.lastCleanupAt ||
       Date.now() - state.lastCleanupAt > CLEANUP_INTERVAL_MS)

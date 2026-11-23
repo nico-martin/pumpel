@@ -133,7 +133,10 @@ export function DriveBackupCard() {
             </div>
             {backup.pending && !backup.running && (
               <p className="text-muted-foreground">
-                {backup.lastError ?? "A backup is waiting to be uploaded."}
+                {backup.lastError ??
+                  (backup.needsReconnect
+                    ? "A backup is waiting. Reconnect Google Drive to upload it."
+                    : "A backup is waiting to be uploaded.")}
               </p>
             )}
             {isFolderPickerConfigured() && (
@@ -154,7 +157,7 @@ export function DriveBackupCard() {
                 onClick={() => runBackup({ interactive: true })}
                 disabled={backup.running}
               >
-                Back up now
+                {backup.needsReconnect ? "Reconnect and back up" : "Back up now"}
               </Button>
               <Button
                 variant="outline"

@@ -272,8 +272,13 @@ Automatic backups only show up if the app is built with a Google OAuth client ID
 2. Set up the OAuth consent screen and add the scope `https://www.googleapis.com/auth/drive.file`.
 3. Create an **OAuth client ID** of type **Web application** and add your origins (e.g. `http://localhost:5000` and your production URL) under **Authorized JavaScript origins**.
 4. Provide the client ID at build time:
-   - locally: create `.env.local` with `VITE_GOOGLE_CLIENT_ID=<your-client-id>`
-   - GitHub Actions: add a repository **secret** `GOOGLE_CLIENT_ID`
+    - locally: create `.env.local` with `VITE_GOOGLE_CLIENT_ID=<your-client-id>`
+    - GitHub Actions: add a repository **secret** `GOOGLE_CLIENT_ID`
+
+Google Drive access expires after about an hour. Pumpel queues backups when
+access expires instead of opening a sign-in popup during a workout. To upload
+the pending backup, open **Account → Automatic Backups** and select
+**Reconnect and back up**.
 
 ### Choosing the backup folder (optional)
 
